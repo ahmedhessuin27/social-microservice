@@ -1,0 +1,157 @@
+name: Likes
+description: |-
+
+  Sync a consuming backend's likes (on posts or comments) into the feed microservice's own copy.
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: 'internal/likes/{id}'
+    metadata:
+      custom: []
+      groupName: Likes
+      groupDescription: |-
+
+        Sync a consuming backend's likes (on posts or comments) into the feed microservice's own copy.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Sync a like'
+      description: |-
+        Idempotent upsert. likeable_type must be "post" or "comment", and the
+        referenced post/comment must already be synced.
+      authenticated: false
+      deprecated: false
+    headers:
+      X-Internal-Timestamp: 'required Unix timestamp used in the HMAC signature. Example: 1735689600'
+      X-Internal-Signature: 'required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: "The like's id, as used by the calling backend."
+        required: true
+        example: 0199c2b1-4b4b-7000-8b3a-1a2b3c4d5e6f
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 0199c2b1-4b4b-7000-8b3a-1a2b3c4d5e6f
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      user_id:
+        custom: []
+        name: user_id
+        description: "The liking user's id, as used by the calling backend. Must be a valid UUID."
+        required: true
+        example: 0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      likeable_id:
+        custom: []
+        name: likeable_id
+        description: 'The id of the post or comment being liked. Must already be synced. Must be a valid UUID.'
+        required: true
+        example: 0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      likeable_type:
+        custom: []
+        name: likeable_type
+        description: 'Either "post" or "comment".'
+        required: true
+        example: post
+        type: string
+        enumValues:
+          - post
+          - comment
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      user_id: 0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f
+      likeable_id: 0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f
+      likeable_type: post
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"status": 200, "message": "Like synced successfully."}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 422
+        content: '{"status": 422, "message": "The given data was invalid.", "error": {"likeable_type": ["The selected likeable type is invalid."]}}'
+        headers: []
+        description: 'Validation error'
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'internal/likes/{id}'
+    metadata:
+      custom: []
+      groupName: Likes
+      groupDescription: |-
+
+        Sync a consuming backend's likes (on posts or comments) into the feed microservice's own copy.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Delete a like'
+      description: 'Idempotent: returns 200 whether or not the like existed locally.'
+      authenticated: false
+      deprecated: false
+    headers:
+      X-Internal-Timestamp: 'required Unix timestamp used in the HMAC signature. Example: 1735689600'
+      X-Internal-Signature: 'required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: "The like's id, as used by the calling backend."
+        required: true
+        example: 0199c2b1-4b4b-7000-8b3a-1a2b3c4d5e6f
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 0199c2b1-4b4b-7000-8b3a-1a2b3c4d5e6f
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"status": 200, "message": "Like deleted successfully."}'
+        headers: []
+        description: ''
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null

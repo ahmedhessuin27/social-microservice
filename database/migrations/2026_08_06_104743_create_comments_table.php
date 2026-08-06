@@ -1,0 +1,44 @@
+<?php
+
+declare(strict_types=1);
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('comments', function (Blueprint $table): void {
+            // Primary key mirrors the source system's comment id, making
+            // PUT /internal/comments/{id} a natural idempotent upsert.
+            $table->uuid('id')->primary();
+
+            // If a comment's sync arrives before its post's, this FK causes the
+            // job to fail and retry via the queue's backoff until the post exists.
+            $table->foreignUuid('post_id')->constrained('posts')->cascadeOnDelete();
+
+            $table->uuid('author_id');
+            $table->text('text');
+            $table->foreignUuid('parent_id')->nullable()->constrained('comments')->nullOnDelete();
+            $table->unsignedInteger('likes_count')->default(0);
+            $table->unsignedInteger('replies_count')->default(0);
+            $table->softDeletes();
+            $table->timestamps();
+
+            $table->index(['post_id', 'created_at']);
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('comments');
+    }
+};

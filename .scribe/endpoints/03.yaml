@@ -1,0 +1,147 @@
+name: Follows
+description: |-
+
+  Sync a consuming backend's follow relationships into the feed microservice's own copy.
+  Unlike posts/comments/likes, follows have no path {id} — they're keyed by
+  the (follower_id, following_id) pair, sent in the request body for both endpoints.
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: internal/follows
+    metadata:
+      custom: []
+      groupName: Follows
+      groupDescription: |-
+
+        Sync a consuming backend's follow relationships into the feed microservice's own copy.
+        Unlike posts/comments/likes, follows have no path {id} — they're keyed by
+        the (follower_id, following_id) pair, sent in the request body for both endpoints.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Sync a follow relationship'
+      description: 'Idempotent: calling this twice with the same pair has no additional effect.'
+      authenticated: false
+      deprecated: false
+    headers:
+      X-Internal-Timestamp: 'required Unix timestamp used in the HMAC signature. Example: 1735689600'
+      X-Internal-Signature: 'required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      follower_id:
+        custom: []
+        name: follower_id
+        description: "The following user's id, as used by the calling backend. Must be a valid UUID."
+        required: true
+        example: 0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      following_id:
+        custom: []
+        name: following_id
+        description: "The followed user's id, as used by the calling backend. The value and <code>follower_id</code> must be different. Must be a valid UUID."
+        required: true
+        example: 0199c2b1-5c5c-7000-8b3a-1a2b3c4d5e6f
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      follower_id: 0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f
+      following_id: 0199c2b1-5c5c-7000-8b3a-1a2b3c4d5e6f
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"status": 200, "message": "Follow relationship synced successfully."}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 422
+        content: '{"status": 422, "message": "The given data was invalid.", "error": {"following_id": ["The following id and follower id must be different."]}}'
+        headers: []
+        description: 'Validation error'
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: internal/follows
+    metadata:
+      custom: []
+      groupName: Follows
+      groupDescription: |-
+
+        Sync a consuming backend's follow relationships into the feed microservice's own copy.
+        Unlike posts/comments/likes, follows have no path {id} — they're keyed by
+        the (follower_id, following_id) pair, sent in the request body for both endpoints.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Delete a follow relationship'
+      description: 'Idempotent: returns 200 whether or not the relationship existed locally.'
+      authenticated: false
+      deprecated: false
+    headers:
+      X-Internal-Timestamp: 'required Unix timestamp used in the HMAC signature. Example: 1735689600'
+      X-Internal-Signature: 'required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      follower_id:
+        custom: []
+        name: follower_id
+        description: "The following user's id, as used by the calling backend. Must be a valid UUID."
+        required: true
+        example: 0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      following_id:
+        custom: []
+        name: following_id
+        description: "The followed user's id, as used by the calling backend. The value and <code>follower_id</code> must be different. Must be a valid UUID."
+        required: true
+        example: 0199c2b1-5c5c-7000-8b3a-1a2b3c4d5e6f
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      follower_id: 0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f
+      following_id: 0199c2b1-5c5c-7000-8b3a-1a2b3c4d5e6f
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"status": 200, "message": "Follow relationship deleted successfully."}'
+        headers: []
+        description: ''
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null

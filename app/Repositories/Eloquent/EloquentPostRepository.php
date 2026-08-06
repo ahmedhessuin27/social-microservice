@@ -1,0 +1,92 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Repositories\Eloquent;
+
+use App\DTOs\PostRequestDTO;
+use App\Enums\PostStatus;
+use App\Models\Hashtag;
+use App\Models\Post;
+use App\Repositories\Contracts\PostRepositoryInterface;
+use Illuminate\Contracts\Pagination\CursorPaginator;
+use Illuminate\Support\Facades\DB;
+
+class EloquentPostRepository implements PostRepositoryInterface
+{
+    public function upsert(PostRequestDTO $data): Post
+    {
+        return DB::transaction(function () use ($data): Post {
+            $post = Post::query()->updateOrCreate(
+                ['id' => $data->id],
+                [
+                    'author_id' => $data->authorId,
+                    'content' => $data->content,
+                    'type' => $data->type,
+                    'status' => $data->status,
+                    'likes_count' => $data->likesCount,
+                    'comments_count' => $data->commentsCount,
+                    'reposts_count' => $data->repostsCount,
+                    'reposted_from_id' => $data->repostedFromId,
+                    'posted_at' => $data->postedAt,
+                ],
+            );
+
+            $this->replaceMedia($post, $data->media);
+            $this->replaceHashtags($post, $data->hashtags);
+
+            return $post;
+        });
+    }
+
+    public function delete(string $id): bool
+    {
+        return Post::whereKey($id)->delete() > 0;
+    }
+
+    public function feedForAuthors(array $authorIds, int $perPage): CursorPaginator
+    {
+        return Post::query()
+            ->whereIn('author_id', $authorIds)
+            ->where('status', PostStatus::Published)
+            ->with(['media', 'hashtags'])
+            ->orderByDesc('posted_at')
+            ->orderByDesc('id')
+            ->cursorPaginate($perPage);
+    }
+
+    /**
+     * @param  array<int, array{url: string, position?: int}>  $media
+     */
+    private function replaceMedia(Post $post, array $media): void
+    {
+        $post->media()->delete();
+
+        if ($media === []) {
+            return;
+        }
+
+        $post->media()->createMany(array_map(
+            fn (array $item, int $index): array => [
+                'url' => $item['url'],
+                'position' => $item['position'] ?? $index,
+            ],
+            $media,
+            array_keys($media),
+        ));
+    }
+
+    /**
+     * @param  array<int, string>  $hashtags
+     */
+    private function replaceHashtags(Post $post, array $hashtags): void
+    {
+        $ids = collect($hashtags)
+            ->filter()
+            ->unique()
+            ->map(fn (string $name): string => Hashtag::query()->firstOrCreate(['name' => $name])->id)
+            ->all();
+
+        $post->hashtags()->sync($ids);
+    }
+}

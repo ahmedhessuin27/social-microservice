@@ -1,0 +1,190 @@
+name: Comments
+description: |-
+
+  Sync a consuming backend's post comments into the feed microservice's own copy.
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: 'internal/comments/{id}'
+    metadata:
+      custom: []
+      groupName: Comments
+      groupDescription: |-
+
+        Sync a consuming backend's post comments into the feed microservice's own copy.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Sync a comment'
+      description: |-
+        Idempotent upsert. The parent post must already be synced — if it
+        isn't yet, this fails on the foreign key and should be retried.
+      authenticated: false
+      deprecated: false
+    headers:
+      X-Internal-Timestamp: 'required Unix timestamp used in the HMAC signature. Example: 1735689600'
+      X-Internal-Signature: 'required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: "The comment's id, as used by the calling backend."
+        required: true
+        example: 0199c2b1-3a3a-7000-8b3a-1a2b3c4d5e6f
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 0199c2b1-3a3a-7000-8b3a-1a2b3c4d5e6f
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      post_id:
+        custom: []
+        name: post_id
+        description: 'The id of the post this comment belongs to. Must already be synced. Must be a valid UUID.'
+        required: true
+        example: 0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      author_id:
+        custom: []
+        name: author_id
+        description: "The comment author's id, as used by the calling backend. Must be a valid UUID."
+        required: true
+        example: 0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      text:
+        custom: []
+        name: text
+        description: 'The comment text.'
+        required: true
+        example: 'Nice post!'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      parent_id:
+        custom: []
+        name: parent_id
+        description: "If this is a reply, the parent comment's id. Must be a valid UUID."
+        required: false
+        example: null
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      likes_count:
+        custom: []
+        name: likes_count
+        description: 'Current like count, as tracked by the calling backend. Must be at least 0.'
+        required: true
+        example: 0
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      replies_count:
+        custom: []
+        name: replies_count
+        description: 'Current reply count, as tracked by the calling backend. Must be at least 0.'
+        required: true
+        example: 0
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      post_id: 0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f
+      author_id: 0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f
+      text: 'Nice post!'
+      likes_count: 0
+      replies_count: 0
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"status": 200, "message": "Comment synced successfully."}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 422
+        content: '{"status": 422, "message": "The given data was invalid.", "error": {"post_id": ["The post id field is required."]}}'
+        headers: []
+        description: 'Validation error'
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'internal/comments/{id}'
+    metadata:
+      custom: []
+      groupName: Comments
+      groupDescription: |-
+
+        Sync a consuming backend's post comments into the feed microservice's own copy.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Delete a comment'
+      description: 'Idempotent: returns 200 whether or not the comment existed locally.'
+      authenticated: false
+      deprecated: false
+    headers:
+      X-Internal-Timestamp: 'required Unix timestamp used in the HMAC signature. Example: 1735689600'
+      X-Internal-Signature: 'required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: "The comment's id, as used by the calling backend."
+        required: true
+        example: 0199c2b1-3a3a-7000-8b3a-1a2b3c4d5e6f
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 0199c2b1-3a3a-7000-8b3a-1a2b3c4d5e6f
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"status": 200, "message": "Comment deleted successfully."}'
+        headers: []
+        description: ''
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
