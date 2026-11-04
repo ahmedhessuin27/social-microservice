@@ -48,19 +48,26 @@ Redis listens on `127.0.0.1` only by default. Keep it that way.
 
 ## 3. Get the code onto the server (SSH as `pomacinf`, not root)
 
-The repository is private, so give the server a read-only deploy key:
+The repository ([ahmedhessuin27/social-microservice](https://github.com/ahmedhessuin27/social-microservice))
+is public, so no SSH key is needed to clone or pull:
+
+```bash
+git clone https://github.com/ahmedhessuin27/social-microservice.git ~/feed-microservice
+cd ~/feed-microservice
+```
+
+If the repository is made private later, give the server a read-only deploy key and switch the remote to SSH:
 
 ```bash
 ssh-keygen -t ed25519 -f ~/.ssh/feed_deploy -N ""
-cat ~/.ssh/feed_deploy.pub    # GitHub → POMAC-EGYPT/feed-microservice-backend → Settings → Deploy keys → Add
+cat ~/.ssh/feed_deploy.pub    # GitHub → ahmedhessuin27/social-microservice → Settings → Deploy keys → Add
 cat >> ~/.ssh/config <<'EOF'
-Host github-feed
+Host github-social
     HostName github.com
     IdentityFile ~/.ssh/feed_deploy
 EOF
 
-git clone git@github-feed:POMAC-EGYPT/feed-microservice-backend.git ~/feed-microservice
-cd ~/feed-microservice
+git remote set-url origin git@github-social:ahmedhessuin27/social-microservice.git
 ```
 
 Use the cPanel PHP 8.3 binary explicitly. The default `php` on the PATH may be a different version:
