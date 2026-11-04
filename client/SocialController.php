@@ -6,6 +6,7 @@
 // The app (mobile/web) talks to these routes with its normal login; this
 // controller adds the logged-in user's id and forwards to the microservice.
 // Never take a user id from the app's request body — always $request->user().
+// Written for PHP 7.3+ and Laravel 8+, so it runs on older consuming apps.
 
 namespace App\Http\Controllers;
 
@@ -17,9 +18,13 @@ use Illuminate\Http\Request;
 
 class SocialController extends Controller
 {
-    public function __construct(
-        private readonly FeedClient $feed,
-    ) {}
+    /** @var FeedClient */
+    private $feed;
+
+    public function __construct(FeedClient $feed)
+    {
+        $this->feed = $feed;
+    }
 
     // ---- Posts --------------------------------------------------------
 
@@ -64,14 +69,14 @@ class SocialController extends Controller
 
     public function comments(Request $request, int $postId): JsonResponse
     {
-        $parentId = $request->filled('parent_id') ? $request->integer('parent_id') : null;
+        $parentId = $request->filled('parent_id') ? (int) $request->input('parent_id') : null;
 
         return $this->forward($this->feed->comments($postId, $request->user()->id, $parentId, $request->query('cursor')));
     }
 
     public function addComment(Request $request, int $postId): JsonResponse
     {
-        $parentId = $request->filled('parent_id') ? $request->integer('parent_id') : null;
+        $parentId = $request->filled('parent_id') ? (int) $request->input('parent_id') : null;
 
         return $this->forward($this->feed->addComment($postId, $request->user()->id, (string) $request->input('text'), $parentId));
     }
@@ -125,7 +130,7 @@ class SocialController extends Controller
 
     private function withAuthors(array $data): array
     {
-        $isList = array_is_list($data);
+        $isList = $data === [] || array_keys($data) === range(0, count($data) - 1);
         $items = $isList ? $data : [$data];
 
         $authorIds = array_values(array_unique(array_filter(array_column($items, 'author_id'))));
@@ -139,7 +144,7 @@ class SocialController extends Controller
 
         $items = array_map(function (array $item) use ($authors): array {
             $author = $authors->get($item['author_id'] ?? null);
-            $item['author'] = $author?->only(['id', 'name']);
+            $item['author'] = $author ? $author->only(['id', 'name']) : null;
 
             return $item;
         }, $items);

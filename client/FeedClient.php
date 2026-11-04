@@ -3,6 +3,7 @@
 // Copy to app/Services/FeedClient.php in the project that uses the feed
 // microservice. Needs FEED_SERVICE_URL / FEED_SERVICE_SECRET in .env and
 // a 'feed' entry in config/services.php (see DEPLOYMENT.md).
+// Written for PHP 7.3+ and Laravel 8+, so it runs on older consuming apps.
 
 namespace App\Services;
 
@@ -19,7 +20,8 @@ class FeedClient
      */
     public function createPost(int $authorId, array $data): Response
     {
-        return $this->send('POST', 'posts', ['author_id' => $authorId, ...$data]);
+        // author_id last, so nothing in $data can override who the author is.
+        return $this->send('POST', 'posts', array_merge($data, ['author_id' => $authorId]));
     }
 
     public function getPost(int $postId, ?int $viewerId = null): Response
@@ -32,7 +34,7 @@ class FeedClient
      */
     public function updatePost(int $postId, int $userId, array $data): Response
     {
-        return $this->send('PUT', "posts/{$postId}", ['user_id' => $userId, ...$data]);
+        return $this->send('PUT', "posts/{$postId}", array_merge($data, ['user_id' => $userId]));
     }
 
     public function deletePost(int $postId, int $userId): Response
@@ -140,6 +142,10 @@ class FeedClient
             $request = $request->withBody($body, 'application/json');
         }
 
-        return $request->send($method, $path, ['query' => array_filter($query, fn ($value) => $value !== null)]);
+        $query = array_filter($query, function ($value) {
+            return $value !== null;
+        });
+
+        return $request->send($method, $path, ['query' => $query]);
     }
 }
