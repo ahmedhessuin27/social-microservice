@@ -17,7 +17,7 @@ return new class extends Migration
             // Locally generated id: media has no independent identity in the
             // source system, it's synced as part of the owning post's payload.
             $table->uuid('id')->primary();
-            $table->foreignUuid('post_id')->constrained('posts')->cascadeOnDelete();
+            $table->foreignId('post_id')->constrained('posts')->cascadeOnDelete();
             $table->string('url');
             $table->unsignedSmallInteger('position')->default(0);
             $table->timestamps();

@@ -33,24 +33,24 @@ endpoints:
         name: id
         description: "The comment's id, as used by the calling backend."
         required: true
-        example: 0199c2b1-3a3a-7000-8b3a-1a2b3c4d5e6f
-        type: string
+        example: 2001
+        type: integer
         enumValues: []
         exampleWasSpecified: true
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      id: 0199c2b1-3a3a-7000-8b3a-1a2b3c4d5e6f
+      id: 2001
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
       post_id:
         custom: []
         name: post_id
-        description: 'The id of the post this comment belongs to. Must already be synced. Must be a valid UUID.'
+        description: 'The id of the post this comment belongs to. Must already be synced. Must be at least 1.'
         required: true
-        example: 0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f
-        type: string
+        example: 1001
+        type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
@@ -58,10 +58,10 @@ endpoints:
       author_id:
         custom: []
         name: author_id
-        description: "The comment author's id, as used by the calling backend. Must be a valid UUID."
+        description: "The comment author's id, as used by the calling backend. Must be at least 1."
         required: true
-        example: 0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f
-        type: string
+        example: 42
+        type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
@@ -80,10 +80,10 @@ endpoints:
       parent_id:
         custom: []
         name: parent_id
-        description: "If this is a reply, the parent comment's id. Must be a valid UUID."
+        description: "If this is a reply, the parent comment's id. Must be at least 1."
         required: false
         example: null
-        type: string
+        type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: true
@@ -111,8 +111,8 @@ endpoints:
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      post_id: 0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f
-      author_id: 0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f
+      post_id: 1001
+      author_id: 42
       text: 'Nice post!'
       likes_count: 0
       replies_count: 0
@@ -163,14 +163,14 @@ endpoints:
         name: id
         description: "The comment's id, as used by the calling backend."
         required: true
-        example: 0199c2b1-3a3a-7000-8b3a-1a2b3c4d5e6f
-        type: string
+        example: 2001
+        type: integer
         enumValues: []
         exampleWasSpecified: true
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      id: 0199c2b1-3a3a-7000-8b3a-1a2b3c4d5e6f
+      id: 2001
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []

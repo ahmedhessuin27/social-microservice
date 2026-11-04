@@ -25,7 +25,7 @@ class EloquentCommentRepository implements CommentRepositoryInterface
         );
     }
 
-    public function delete(string $id): bool
+    public function delete(int $id): bool
     {
         return Comment::whereKey($id)->delete() > 0;
     }

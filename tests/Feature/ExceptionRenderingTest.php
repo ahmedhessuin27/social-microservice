@@ -6,7 +6,6 @@ namespace Tests\Feature;
 
 use App\Services\Contracts\HmacSignerInterface;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Str;
 use Tests\TestCase;
 
 final class ExceptionRenderingTest extends TestCase
@@ -37,7 +36,7 @@ final class ExceptionRenderingTest extends TestCase
 
     public function test_invalid_payload_returns_api_shaped_422_with_field_errors(): void
     {
-        $id = (string) Str::uuid();
+        $id = 1;
         $body = json_encode(['type' => 'bogus']);
 
         $response = $this->withHeaders($this->signedHeaders('PUT', "internal/posts/{$id}", $body))
@@ -61,14 +60,14 @@ final class ExceptionRenderingTest extends TestCase
     {
         config(['app.debug' => false]);
 
-        // reposted_from_id passes uuid validation but points at a post that
+        // reposted_from_id passes integer validation but points at a post that
         // doesn't exist, tripping the FK constraint -> QueryException,
         // exercising the generic Throwable -> 500 branch.
-        $id = (string) Str::uuid();
+        $id = 1;
         $body = json_encode([
-            'author_id' => (string) Str::uuid(), 'content' => 'x', 'type' => 'text', 'status' => 'published',
+            'author_id' => 1, 'content' => 'x', 'type' => 'text', 'status' => 'published',
             'likes_count' => 0, 'comments_count' => 0, 'reposts_count' => 0,
-            'reposted_from_id' => (string) Str::uuid(),
+            'reposted_from_id' => 999,
             'posted_at' => now()->toISOString(),
         ]);
 

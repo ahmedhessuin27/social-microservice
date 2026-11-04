@@ -7,9 +7,9 @@ namespace App\DTOs;
 final readonly class LikeRequestDTO
 {
     public function __construct(
-        public string $id,
-        public string $userId,
-        public string $likeableId,
+        public int $id,
+        public int $userId,
+        public int $likeableId,
         public string $likeableType,
     ) {}
 }

@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Like extends Model
 {
-    use HasUuids;
+    // Primary key mirrors the consuming application's own integer id.
+    public $incrementing = false;
+
+    protected $keyType = 'int';
 
     protected $fillable = [
         'id',

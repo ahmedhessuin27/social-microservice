@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <title>Feed Microservice API Documentation</title>
+    <title>Laravel API Documentation</title>
 
     <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
 
@@ -84,7 +84,10 @@
                     <a href="#feed">Feed</a>
                 </li>
                                     <ul id="tocify-subheader-feed" class="tocify-subheader">
-                                                    <li class="tocify-item level-2" data-unique="feed-GETinternal-feed--userId-">
+                                                    <li class="tocify-item level-2" data-unique="feed-GETinternal-feed">
+                                <a href="#feed-GETinternal-feed">Get the global feed</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="feed-GETinternal-feed--userId-">
                                 <a href="#feed-GETinternal-feed--userId-">Get a user's feed</a>
                             </li>
                                                                         </ul>
@@ -137,7 +140,7 @@
     </ul>
 
     <ul class="toc-footer" id="last-updated">
-        <li>Last updated: August 6, 2026</li>
+        <li>Last updated: November 4, 2026</li>
     </ul>
 </div>
 
@@ -200,14 +203,14 @@ isn't yet, this fails on the foreign key and should be retried.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://localhost/internal/comments/0199c2b1-3a3a-7000-8b3a-1a2b3c4d5e6f" \
+    "http://localhost/internal/comments/2001" \
     --header "X-Internal-Timestamp: required Unix timestamp used in the HMAC signature. Example: 1735689600" \
     --header "X-Internal-Signature: required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"post_id\": \"0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f\",
-    \"author_id\": \"0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f\",
+    \"post_id\": 1001,
+    \"author_id\": 42,
     \"text\": \"Nice post!\",
     \"likes_count\": 0,
     \"replies_count\": 0
@@ -217,7 +220,7 @@ isn't yet, this fails on the foreign key and should be retried.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/internal/comments/0199c2b1-3a3a-7000-8b3a-1a2b3c4d5e6f"
+    "http://localhost/internal/comments/2001"
 );
 
 const headers = {
@@ -228,8 +231,8 @@ const headers = {
 };
 
 let body = {
-    "post_id": "0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f",
-    "author_id": "0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f",
+    "post_id": 1001,
+    "author_id": 42,
     "text": "Nice post!",
     "likes_count": 0,
     "replies_count": 0
@@ -368,40 +371,40 @@ You can check the Dev Tools console for debugging information.</code></pre>
                         <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>id</code></b>&nbsp;&nbsp;
-<small>string</small>&nbsp;
+<small>integer</small>&nbsp;
  &nbsp;
  &nbsp;
-                <input type="text" style="display: none"
-                              name="id"                data-endpoint="PUTinternal-comments--id-"
-               value="0199c2b1-3a3a-7000-8b3a-1a2b3c4d5e6f"
+                <input type="number" style="display: none"
+               step="any"               name="id"                data-endpoint="PUTinternal-comments--id-"
+               value="2001"
                data-component="url">
     <br>
-<p>The comment's id, as used by the calling backend. Example: <code>0199c2b1-3a3a-7000-8b3a-1a2b3c4d5e6f</code></p>
+<p>The comment's id, as used by the calling backend. Example: <code>2001</code></p>
             </div>
                             <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
         <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>post_id</code></b>&nbsp;&nbsp;
-<small>string</small>&nbsp;
+<small>integer</small>&nbsp;
  &nbsp;
  &nbsp;
-                <input type="text" style="display: none"
-                              name="post_id"                data-endpoint="PUTinternal-comments--id-"
-               value="0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f"
+                <input type="number" style="display: none"
+               step="any"               name="post_id"                data-endpoint="PUTinternal-comments--id-"
+               value="1001"
                data-component="body">
     <br>
-<p>The id of the post this comment belongs to. Must already be synced. Must be a valid UUID. Example: <code>0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f</code></p>
+<p>The id of the post this comment belongs to. Must already be synced. Must be at least 1. Example: <code>1001</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>author_id</code></b>&nbsp;&nbsp;
-<small>string</small>&nbsp;
+<small>integer</small>&nbsp;
  &nbsp;
  &nbsp;
-                <input type="text" style="display: none"
-                              name="author_id"                data-endpoint="PUTinternal-comments--id-"
-               value="0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f"
+                <input type="number" style="display: none"
+               step="any"               name="author_id"                data-endpoint="PUTinternal-comments--id-"
+               value="42"
                data-component="body">
     <br>
-<p>The comment author's id, as used by the calling backend. Must be a valid UUID. Example: <code>0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f</code></p>
+<p>The comment author's id, as used by the calling backend. Must be at least 1. Example: <code>42</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>text</code></b>&nbsp;&nbsp;
@@ -417,15 +420,15 @@ You can check the Dev Tools console for debugging information.</code></pre>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>parent_id</code></b>&nbsp;&nbsp;
-<small>string</small>&nbsp;
+<small>integer</small>&nbsp;
 <i>optional</i> &nbsp;
  &nbsp;
-                <input type="text" style="display: none"
-                              name="parent_id"                data-endpoint="PUTinternal-comments--id-"
+                <input type="number" style="display: none"
+               step="any"               name="parent_id"                data-endpoint="PUTinternal-comments--id-"
                value=""
                data-component="body">
     <br>
-<p>If this is a reply, the parent comment's id. Must be a valid UUID.</p>
+<p>If this is a reply, the parent comment's id. Must be at least 1.</p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>likes_count</code></b>&nbsp;&nbsp;
@@ -466,7 +469,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://localhost/internal/comments/0199c2b1-3a3a-7000-8b3a-1a2b3c4d5e6f" \
+    "http://localhost/internal/comments/2001" \
     --header "X-Internal-Timestamp: required Unix timestamp used in the HMAC signature. Example: 1735689600" \
     --header "X-Internal-Signature: required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9" \
     --header "Content-Type: application/json" \
@@ -475,7 +478,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/internal/comments/0199c2b1-3a3a-7000-8b3a-1a2b3c4d5e6f"
+    "http://localhost/internal/comments/2001"
 );
 
 const headers = {
@@ -603,23 +606,243 @@ You can check the Dev Tools console for debugging information.</code></pre>
                         <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>id</code></b>&nbsp;&nbsp;
-<small>string</small>&nbsp;
+<small>integer</small>&nbsp;
  &nbsp;
  &nbsp;
-                <input type="text" style="display: none"
-                              name="id"                data-endpoint="DELETEinternal-comments--id-"
-               value="0199c2b1-3a3a-7000-8b3a-1a2b3c4d5e6f"
+                <input type="number" style="display: none"
+               step="any"               name="id"                data-endpoint="DELETEinternal-comments--id-"
+               value="2001"
                data-component="url">
     <br>
-<p>The comment's id, as used by the calling backend. Example: <code>0199c2b1-3a3a-7000-8b3a-1a2b3c4d5e6f</code></p>
+<p>The comment's id, as used by the calling backend. Example: <code>2001</code></p>
             </div>
                     </form>
 
                 <h1 id="feed">Feed</h1>
 
-    <p>Read the merged feed (own posts + followed users' posts) for a given user.</p>
+    <p>Read published posts, newest first: either every author's posts (for
+consumers with no follow system) or one user's merged feed (own posts +
+followed users' posts).</p>
 
-                                <h2 id="feed-GETinternal-feed--userId-">Get a user&#039;s feed</h2>
+                                <h2 id="feed-GETinternal-feed">Get the global feed</h2>
+
+<p>
+</p>
+
+<p>Returns every author's published posts, newest first, cursor-paginated.
+Use this when the calling backend has no follow/following system.
+Draft/hidden posts are excluded.</p>
+
+<span id="example-requests-GETinternal-feed">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/internal/feed?per_page=15" \
+    --header "X-Internal-Timestamp: required Unix timestamp used in the HMAC signature. Example: 1735689600" \
+    --header "X-Internal-Signature: required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"per_page\": 1
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/internal/feed"
+);
+
+const params = {
+    "per_page": "15",
+};
+Object.keys(params)
+    .forEach(key =&gt; url.searchParams.append(key, params[key]));
+
+const headers = {
+    "X-Internal-Timestamp": "required Unix timestamp used in the HMAC signature. Example: 1735689600",
+    "X-Internal-Signature": "required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "per_page": 1
+};
+
+fetch(url, {
+    method: "GET",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETinternal-feed">
+            <blockquote>
+            <p>Example response (200):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;status&quot;: 200,
+    &quot;message&quot;: &quot;Feed retrieved successfully.&quot;,
+    &quot;data&quot;: [
+        {
+            &quot;id&quot;: 1001,
+            &quot;author_id&quot;: 42,
+            &quot;content&quot;: &quot;Hello world&quot;,
+            &quot;type&quot;: &quot;text&quot;,
+            &quot;status&quot;: &quot;published&quot;,
+            &quot;likes_count&quot;: 3,
+            &quot;comments_count&quot;: 1,
+            &quot;reposts_count&quot;: 0,
+            &quot;reposted_from_id&quot;: null,
+            &quot;posted_at&quot;: &quot;2026-08-06T12:00:00.000000Z&quot;,
+            &quot;media&quot;: [],
+            &quot;hashtags&quot;: [
+                &quot;laravel&quot;
+            ]
+        }
+    ],
+    &quot;next_cursor&quot;: &quot;eyJwb3N0ZWRfYXQiOiIyMDI2LTA4LTA2IDEyOjAwOjAwIn0&quot;,
+    &quot;prev_cursor&quot;: null,
+    &quot;per_page&quot;: 15,
+    &quot;links&quot;: {
+        &quot;first&quot;: null,
+        &quot;last&quot;: null,
+        &quot;prev&quot;: null,
+        &quot;next&quot;: &quot;http://localhost/internal/feed?cursor=eyJwb3N0ZWRfYXQiOiIyMDI2LTA4LTA2IDEyOjAwOjAwIn0&quot;
+    }
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETinternal-feed" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETinternal-feed"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETinternal-feed"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETinternal-feed" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETinternal-feed">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETinternal-feed" data-method="GET"
+      data-path="internal/feed"
+      data-authed="0"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETinternal-feed', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETinternal-feed"
+                    onclick="tryItOut('GETinternal-feed');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETinternal-feed"
+                    onclick="cancelTryOut('GETinternal-feed');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETinternal-feed"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>internal/feed</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>X-Internal-Timestamp</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="X-Internal-Timestamp"                data-endpoint="GETinternal-feed"
+               value="required Unix timestamp used in the HMAC signature. Example: 1735689600"
+               data-component="header">
+    <br>
+<p>Example: <code>required Unix timestamp used in the HMAC signature. Example: 1735689600</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>X-Internal-Signature</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="X-Internal-Signature"                data-endpoint="GETinternal-feed"
+               value="required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9"
+               data-component="header">
+    <br>
+<p>Example: <code>required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETinternal-feed"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETinternal-feed"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                            <h4 class="fancy-heading-panel"><b>Query Parameters</b></h4>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>per_page</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="per_page"                data-endpoint="GETinternal-feed"
+               value="15"
+               data-component="query">
+    <br>
+<p>Number of posts per page (1-50). Defaults to 15. Example: <code>15</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>per_page</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="per_page"                data-endpoint="GETinternal-feed"
+               value="1"
+               data-component="body">
+    <br>
+<p>Must be at least 1. Must not be greater than 50. Example: <code>1</code></p>
+        </div>
+        </form>
+
+                    <h2 id="feed-GETinternal-feed--userId-">Get a user&#039;s feed</h2>
 
 <p>
 </p>
@@ -633,7 +856,7 @@ first, cursor-paginated. Draft/hidden posts are excluded.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/internal/feed/0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f?per_page=15" \
+    --get "http://localhost/internal/feed/42?per_page=15" \
     --header "X-Internal-Timestamp: required Unix timestamp used in the HMAC signature. Example: 1735689600" \
     --header "X-Internal-Signature: required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9" \
     --header "Content-Type: application/json" \
@@ -646,7 +869,7 @@ first, cursor-paginated. Draft/hidden posts are excluded.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/internal/feed/0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f"
+    "http://localhost/internal/feed/42"
 );
 
 const params = {
@@ -685,8 +908,8 @@ fetch(url, {
     &quot;message&quot;: &quot;Feed retrieved successfully.&quot;,
     &quot;data&quot;: [
         {
-            &quot;id&quot;: &quot;0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f&quot;,
-            &quot;author_id&quot;: &quot;0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f&quot;,
+            &quot;id&quot;: 1001,
+            &quot;author_id&quot;: 42,
             &quot;content&quot;: &quot;Hello world&quot;,
             &quot;type&quot;: &quot;text&quot;,
             &quot;status&quot;: &quot;published&quot;,
@@ -708,7 +931,7 @@ fetch(url, {
         &quot;first&quot;: null,
         &quot;last&quot;: null,
         &quot;prev&quot;: null,
-        &quot;next&quot;: &quot;http://localhost/internal/feed/0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f?cursor=eyJwb3N0ZWRfYXQiOiIyMDI2LTA4LTA2IDEyOjAwOjAwIn0&quot;
+        &quot;next&quot;: &quot;http://localhost/internal/feed/42?cursor=eyJwb3N0ZWRfYXQiOiIyMDI2LTA4LTA2IDEyOjAwOjAwIn0&quot;
     }
 }</code>
  </pre>
@@ -811,15 +1034,15 @@ You can check the Dev Tools console for debugging information.</code></pre>
                         <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>userId</code></b>&nbsp;&nbsp;
-<small>string</small>&nbsp;
+<small>integer</small>&nbsp;
  &nbsp;
  &nbsp;
-                <input type="text" style="display: none"
-                              name="userId"                data-endpoint="GETinternal-feed--userId-"
-               value="0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f"
+                <input type="number" style="display: none"
+               step="any"               name="userId"                data-endpoint="GETinternal-feed--userId-"
+               value="42"
                data-component="url">
     <br>
-<p>The id of the user whose feed to build, as used by the calling backend. Example: <code>0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f</code></p>
+<p>The id of the user whose feed to build, as used by the calling backend. Example: <code>42</code></p>
             </div>
                         <h4 class="fancy-heading-panel"><b>Query Parameters</b></h4>
                                     <div style="padding-left: 28px; clear: unset;">
@@ -874,8 +1097,8 @@ the (follower_id, following_id) pair, sent in the request body for both endpoint
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"follower_id\": \"0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f\",
-    \"following_id\": \"0199c2b1-5c5c-7000-8b3a-1a2b3c4d5e6f\"
+    \"follower_id\": 42,
+    \"following_id\": 43
 }"
 </code></pre></div>
 
@@ -893,8 +1116,8 @@ const headers = {
 };
 
 let body = {
-    "follower_id": "0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f",
-    "following_id": "0199c2b1-5c5c-7000-8b3a-1a2b3c4d5e6f"
+    "follower_id": 42,
+    "following_id": 43
 };
 
 fetch(url, {
@@ -1030,27 +1253,27 @@ You can check the Dev Tools console for debugging information.</code></pre>
                                 <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
         <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>follower_id</code></b>&nbsp;&nbsp;
-<small>string</small>&nbsp;
+<small>integer</small>&nbsp;
  &nbsp;
  &nbsp;
-                <input type="text" style="display: none"
-                              name="follower_id"                data-endpoint="PUTinternal-follows"
-               value="0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f"
+                <input type="number" style="display: none"
+               step="any"               name="follower_id"                data-endpoint="PUTinternal-follows"
+               value="42"
                data-component="body">
     <br>
-<p>The following user's id, as used by the calling backend. Must be a valid UUID. Example: <code>0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f</code></p>
+<p>The following user's id, as used by the calling backend. Must be at least 1. Example: <code>42</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>following_id</code></b>&nbsp;&nbsp;
-<small>string</small>&nbsp;
+<small>integer</small>&nbsp;
  &nbsp;
  &nbsp;
-                <input type="text" style="display: none"
-                              name="following_id"                data-endpoint="PUTinternal-follows"
-               value="0199c2b1-5c5c-7000-8b3a-1a2b3c4d5e6f"
+                <input type="number" style="display: none"
+               step="any"               name="following_id"                data-endpoint="PUTinternal-follows"
+               value="43"
                data-component="body">
     <br>
-<p>The followed user's id, as used by the calling backend. The value and <code>follower_id</code> must be different. Must be a valid UUID. Example: <code>0199c2b1-5c5c-7000-8b3a-1a2b3c4d5e6f</code></p>
+<p>The followed user's id, as used by the calling backend. The value and <code>follower_id</code> must be different. Must be at least 1. Example: <code>43</code></p>
         </div>
         </form>
 
@@ -1073,8 +1296,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"follower_id\": \"0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f\",
-    \"following_id\": \"0199c2b1-5c5c-7000-8b3a-1a2b3c4d5e6f\"
+    \"follower_id\": 42,
+    \"following_id\": 43
 }"
 </code></pre></div>
 
@@ -1092,8 +1315,8 @@ const headers = {
 };
 
 let body = {
-    "follower_id": "0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f",
-    "following_id": "0199c2b1-5c5c-7000-8b3a-1a2b3c4d5e6f"
+    "follower_id": 42,
+    "following_id": 43
 };
 
 fetch(url, {
@@ -1214,27 +1437,27 @@ You can check the Dev Tools console for debugging information.</code></pre>
                                 <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
         <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>follower_id</code></b>&nbsp;&nbsp;
-<small>string</small>&nbsp;
+<small>integer</small>&nbsp;
  &nbsp;
  &nbsp;
-                <input type="text" style="display: none"
-                              name="follower_id"                data-endpoint="DELETEinternal-follows"
-               value="0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f"
+                <input type="number" style="display: none"
+               step="any"               name="follower_id"                data-endpoint="DELETEinternal-follows"
+               value="42"
                data-component="body">
     <br>
-<p>The following user's id, as used by the calling backend. Must be a valid UUID. Example: <code>0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f</code></p>
+<p>The following user's id, as used by the calling backend. Must be at least 1. Example: <code>42</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>following_id</code></b>&nbsp;&nbsp;
-<small>string</small>&nbsp;
+<small>integer</small>&nbsp;
  &nbsp;
  &nbsp;
-                <input type="text" style="display: none"
-                              name="following_id"                data-endpoint="DELETEinternal-follows"
-               value="0199c2b1-5c5c-7000-8b3a-1a2b3c4d5e6f"
+                <input type="number" style="display: none"
+               step="any"               name="following_id"                data-endpoint="DELETEinternal-follows"
+               value="43"
                data-component="body">
     <br>
-<p>The followed user's id, as used by the calling backend. The value and <code>follower_id</code> must be different. Must be a valid UUID. Example: <code>0199c2b1-5c5c-7000-8b3a-1a2b3c4d5e6f</code></p>
+<p>The followed user's id, as used by the calling backend. The value and <code>follower_id</code> must be different. Must be at least 1. Example: <code>43</code></p>
         </div>
         </form>
 
@@ -1256,14 +1479,14 @@ referenced post/comment must already be synced.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://localhost/internal/likes/0199c2b1-4b4b-7000-8b3a-1a2b3c4d5e6f" \
+    "http://localhost/internal/likes/3001" \
     --header "X-Internal-Timestamp: required Unix timestamp used in the HMAC signature. Example: 1735689600" \
     --header "X-Internal-Signature: required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"user_id\": \"0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f\",
-    \"likeable_id\": \"0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f\",
+    \"user_id\": 42,
+    \"likeable_id\": 1001,
     \"likeable_type\": \"post\"
 }"
 </code></pre></div>
@@ -1271,7 +1494,7 @@ referenced post/comment must already be synced.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/internal/likes/0199c2b1-4b4b-7000-8b3a-1a2b3c4d5e6f"
+    "http://localhost/internal/likes/3001"
 );
 
 const headers = {
@@ -1282,8 +1505,8 @@ const headers = {
 };
 
 let body = {
-    "user_id": "0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f",
-    "likeable_id": "0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f",
+    "user_id": 42,
+    "likeable_id": 1001,
     "likeable_type": "post"
 };
 
@@ -1420,40 +1643,40 @@ You can check the Dev Tools console for debugging information.</code></pre>
                         <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>id</code></b>&nbsp;&nbsp;
-<small>string</small>&nbsp;
+<small>integer</small>&nbsp;
  &nbsp;
  &nbsp;
-                <input type="text" style="display: none"
-                              name="id"                data-endpoint="PUTinternal-likes--id-"
-               value="0199c2b1-4b4b-7000-8b3a-1a2b3c4d5e6f"
+                <input type="number" style="display: none"
+               step="any"               name="id"                data-endpoint="PUTinternal-likes--id-"
+               value="3001"
                data-component="url">
     <br>
-<p>The like's id, as used by the calling backend. Example: <code>0199c2b1-4b4b-7000-8b3a-1a2b3c4d5e6f</code></p>
+<p>The like's id, as used by the calling backend. Example: <code>3001</code></p>
             </div>
                             <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
         <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>user_id</code></b>&nbsp;&nbsp;
-<small>string</small>&nbsp;
+<small>integer</small>&nbsp;
  &nbsp;
  &nbsp;
-                <input type="text" style="display: none"
-                              name="user_id"                data-endpoint="PUTinternal-likes--id-"
-               value="0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f"
+                <input type="number" style="display: none"
+               step="any"               name="user_id"                data-endpoint="PUTinternal-likes--id-"
+               value="42"
                data-component="body">
     <br>
-<p>The liking user's id, as used by the calling backend. Must be a valid UUID. Example: <code>0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f</code></p>
+<p>The liking user's id, as used by the calling backend. Must be at least 1. Example: <code>42</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>likeable_id</code></b>&nbsp;&nbsp;
-<small>string</small>&nbsp;
+<small>integer</small>&nbsp;
  &nbsp;
  &nbsp;
-                <input type="text" style="display: none"
-                              name="likeable_id"                data-endpoint="PUTinternal-likes--id-"
-               value="0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f"
+                <input type="number" style="display: none"
+               step="any"               name="likeable_id"                data-endpoint="PUTinternal-likes--id-"
+               value="1001"
                data-component="body">
     <br>
-<p>The id of the post or comment being liked. Must already be synced. Must be a valid UUID. Example: <code>0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f</code></p>
+<p>The id of the post or comment being liked. Must already be synced. Must be at least 1. Example: <code>1001</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>likeable_type</code></b>&nbsp;&nbsp;
@@ -1484,7 +1707,7 @@ Must be one of:
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://localhost/internal/likes/0199c2b1-4b4b-7000-8b3a-1a2b3c4d5e6f" \
+    "http://localhost/internal/likes/3001" \
     --header "X-Internal-Timestamp: required Unix timestamp used in the HMAC signature. Example: 1735689600" \
     --header "X-Internal-Signature: required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9" \
     --header "Content-Type: application/json" \
@@ -1493,7 +1716,7 @@ Must be one of:
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/internal/likes/0199c2b1-4b4b-7000-8b3a-1a2b3c4d5e6f"
+    "http://localhost/internal/likes/3001"
 );
 
 const headers = {
@@ -1621,15 +1844,15 @@ You can check the Dev Tools console for debugging information.</code></pre>
                         <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>id</code></b>&nbsp;&nbsp;
-<small>string</small>&nbsp;
+<small>integer</small>&nbsp;
  &nbsp;
  &nbsp;
-                <input type="text" style="display: none"
-                              name="id"                data-endpoint="DELETEinternal-likes--id-"
-               value="0199c2b1-4b4b-7000-8b3a-1a2b3c4d5e6f"
+                <input type="number" style="display: none"
+               step="any"               name="id"                data-endpoint="DELETEinternal-likes--id-"
+               value="3001"
                data-component="url">
     <br>
-<p>The like's id, as used by the calling backend. Example: <code>0199c2b1-4b4b-7000-8b3a-1a2b3c4d5e6f</code></p>
+<p>The like's id, as used by the calling backend. Example: <code>3001</code></p>
             </div>
                     </form>
 
@@ -1652,13 +1875,13 @@ uses for this post — it becomes this service's primary key too.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://localhost/internal/posts/0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f" \
+    "http://localhost/internal/posts/1001" \
     --header "X-Internal-Timestamp: required Unix timestamp used in the HMAC signature. Example: 1735689600" \
     --header "X-Internal-Signature: required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"author_id\": \"0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f\",
+    \"author_id\": 42,
     \"content\": \"Hello world\",
     \"type\": \"text\",
     \"status\": \"published\",
@@ -1681,7 +1904,7 @@ uses for this post — it becomes this service's primary key too.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/internal/posts/0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f"
+    "http://localhost/internal/posts/1001"
 );
 
 const headers = {
@@ -1692,7 +1915,7 @@ const headers = {
 };
 
 let body = {
-    "author_id": "0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f",
+    "author_id": 42,
     "content": "Hello world",
     "type": "text",
     "status": "published",
@@ -1844,28 +2067,28 @@ You can check the Dev Tools console for debugging information.</code></pre>
                         <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>id</code></b>&nbsp;&nbsp;
-<small>string</small>&nbsp;
+<small>integer</small>&nbsp;
  &nbsp;
  &nbsp;
-                <input type="text" style="display: none"
-                              name="id"                data-endpoint="PUTinternal-posts--id-"
-               value="0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f"
+                <input type="number" style="display: none"
+               step="any"               name="id"                data-endpoint="PUTinternal-posts--id-"
+               value="1001"
                data-component="url">
     <br>
-<p>The post's id, as used by the calling backend. Example: <code>0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f</code></p>
+<p>The post's id, as used by the calling backend. Example: <code>1001</code></p>
             </div>
                             <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
         <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>author_id</code></b>&nbsp;&nbsp;
-<small>string</small>&nbsp;
+<small>integer</small>&nbsp;
  &nbsp;
  &nbsp;
-                <input type="text" style="display: none"
-                              name="author_id"                data-endpoint="PUTinternal-posts--id-"
-               value="0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f"
+                <input type="number" style="display: none"
+               step="any"               name="author_id"                data-endpoint="PUTinternal-posts--id-"
+               value="42"
                data-component="body">
     <br>
-<p>The post author's id, as used by the calling backend. Must be a valid UUID. Example: <code>0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f</code></p>
+<p>The post author's id, as used by the calling backend. Must be at least 1. Example: <code>42</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>content</code></b>&nbsp;&nbsp;
@@ -1945,15 +2168,15 @@ Must be one of:
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>reposted_from_id</code></b>&nbsp;&nbsp;
-<small>string</small>&nbsp;
+<small>integer</small>&nbsp;
 <i>optional</i> &nbsp;
  &nbsp;
-                <input type="text" style="display: none"
-                              name="reposted_from_id"                data-endpoint="PUTinternal-posts--id-"
+                <input type="number" style="display: none"
+               step="any"               name="reposted_from_id"                data-endpoint="PUTinternal-posts--id-"
                value=""
                data-component="body">
     <br>
-<p>If this is a repost, the id of the original post (must already be synced). Must be a valid UUID.</p>
+<p>If this is a repost, the id of the original post (must already be synced). Must be at least 1.</p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>posted_at</code></b>&nbsp;&nbsp;
@@ -2032,7 +2255,7 @@ Must be one of:
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://localhost/internal/posts/0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f" \
+    "http://localhost/internal/posts/1001" \
     --header "X-Internal-Timestamp: required Unix timestamp used in the HMAC signature. Example: 1735689600" \
     --header "X-Internal-Signature: required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9" \
     --header "Content-Type: application/json" \
@@ -2041,7 +2264,7 @@ Must be one of:
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/internal/posts/0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f"
+    "http://localhost/internal/posts/1001"
 );
 
 const headers = {
@@ -2169,15 +2392,15 @@ You can check the Dev Tools console for debugging information.</code></pre>
                         <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>id</code></b>&nbsp;&nbsp;
-<small>string</small>&nbsp;
+<small>integer</small>&nbsp;
  &nbsp;
  &nbsp;
-                <input type="text" style="display: none"
-                              name="id"                data-endpoint="DELETEinternal-posts--id-"
-               value="0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f"
+                <input type="number" style="display: none"
+               step="any"               name="id"                data-endpoint="DELETEinternal-posts--id-"
+               value="1001"
                data-component="url">
     <br>
-<p>The post's id, as used by the calling backend. Example: <code>0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f</code></p>
+<p>The post's id, as used by the calling backend. Example: <code>1001</code></p>
             </div>
                     </form>
 

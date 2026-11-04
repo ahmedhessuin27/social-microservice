@@ -21,16 +21,17 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::put('posts/{id}', [PostController::class, 'update'])->whereUuid('id');
-Route::delete('posts/{id}', [PostController::class, 'destroy'])->whereUuid('id');
+Route::put('posts/{id}', [PostController::class, 'update'])->whereNumber('id');
+Route::delete('posts/{id}', [PostController::class, 'destroy'])->whereNumber('id');
 
-Route::put('comments/{id}', [CommentController::class, 'update'])->whereUuid('id');
-Route::delete('comments/{id}', [CommentController::class, 'destroy'])->whereUuid('id');
+Route::put('comments/{id}', [CommentController::class, 'update'])->whereNumber('id');
+Route::delete('comments/{id}', [CommentController::class, 'destroy'])->whereNumber('id');
 
-Route::put('likes/{id}', [LikeController::class, 'update'])->whereUuid('id');
-Route::delete('likes/{id}', [LikeController::class, 'destroy'])->whereUuid('id');
+Route::put('likes/{id}', [LikeController::class, 'update'])->whereNumber('id');
+Route::delete('likes/{id}', [LikeController::class, 'destroy'])->whereNumber('id');
 
 Route::put('follows', [FollowController::class, 'update']);
 Route::delete('follows', [FollowController::class, 'destroy']);
 
-Route::get('feed/{userId}', [FeedController::class, 'index'])->whereUuid('userId');
+Route::get('feed', [FeedController::class, 'latest']);
+Route::get('feed/{userId}', [FeedController::class, 'index'])->whereNumber('userId');

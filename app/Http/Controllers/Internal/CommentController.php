@@ -26,7 +26,7 @@ final class CommentController extends Controller
      * Idempotent upsert. The parent post must already be synced — if it
      * isn't yet, this fails on the foreign key and should be retried.
      *
-     * @urlParam id string required The comment's id, as used by the calling backend. Example: 0199c2b1-3a3a-7000-8b3a-1a2b3c4d5e6f
+     * @urlParam id integer required The comment's id, as used by the calling backend. Example: 2001
      *
      * @header X-Internal-Timestamp required Unix timestamp used in the HMAC signature. Example: 1735689600
      * @header X-Internal-Signature required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9
@@ -34,7 +34,7 @@ final class CommentController extends Controller
      * @response 200 {"status": 200, "message": "Comment synced successfully."}
      * @response 422 scenario="Validation error" {"status": 422, "message": "The given data was invalid.", "error": {"post_id": ["The post id field is required."]}}
      */
-    public function update(CommentRequest $request, string $id): JsonResponse
+    public function update(CommentRequest $request, int $id): JsonResponse
     {
         $this->comments->upsert($request->toDto($id));
 
@@ -46,14 +46,14 @@ final class CommentController extends Controller
      *
      * Idempotent: returns 200 whether or not the comment existed locally.
      *
-     * @urlParam id string required The comment's id, as used by the calling backend. Example: 0199c2b1-3a3a-7000-8b3a-1a2b3c4d5e6f
+     * @urlParam id integer required The comment's id, as used by the calling backend. Example: 2001
      *
      * @header X-Internal-Timestamp required Unix timestamp used in the HMAC signature. Example: 1735689600
      * @header X-Internal-Signature required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9
      *
      * @response 200 {"status": 200, "message": "Comment deleted successfully."}
      */
-    public function destroy(string $id): JsonResponse
+    public function destroy(int $id): JsonResponse
     {
         $this->comments->delete($id);
 

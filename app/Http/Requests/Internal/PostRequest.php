@@ -24,14 +24,14 @@ final class PostRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'author_id' => ['required', 'uuid'],
+            'author_id' => ['required', 'integer', 'min:1'],
             'content' => ['nullable', 'string'],
             'type' => ['required', Rule::enum(PostType::class)],
             'status' => ['required', Rule::enum(PostStatus::class)],
             'likes_count' => ['required', 'integer', 'min:0'],
             'comments_count' => ['required', 'integer', 'min:0'],
             'reposts_count' => ['required', 'integer', 'min:0'],
-            'reposted_from_id' => ['nullable', 'uuid'],
+            'reposted_from_id' => ['nullable', 'integer', 'min:1'],
             'posted_at' => ['required', 'date'],
             'media' => ['sometimes', 'array'],
             'media.*.url' => ['required', 'url'],
@@ -47,7 +47,7 @@ final class PostRequest extends FormRequest
     public function bodyParameters(): array
     {
         return [
-            'author_id' => ['description' => "The post author's id, as used by the calling backend.", 'example' => '0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f'],
+            'author_id' => ['description' => "The post author's id, as used by the calling backend.", 'example' => 42],
             'content' => ['description' => 'The post text.', 'example' => 'Hello world'],
             'type' => ['description' => 'One of: text, image, video, multi_image.', 'example' => 'text'],
             'status' => ['description' => 'One of: published, draft, hidden. Only published posts appear in feeds.', 'example' => 'published'],
@@ -64,18 +64,18 @@ final class PostRequest extends FormRequest
         ];
     }
 
-    public function toDto(string $id): PostRequestDTO
+    public function toDto(int $id): PostRequestDTO
     {
         return new PostRequestDTO(
             id: $id,
-            authorId: $this->string('author_id')->toString(),
+            authorId: $this->integer('author_id'),
             content: $this->input('content'),
             type: PostType::from($this->string('type')->toString()),
             status: PostStatus::from($this->string('status')->toString()),
             likesCount: $this->integer('likes_count'),
             commentsCount: $this->integer('comments_count'),
             repostsCount: $this->integer('reposts_count'),
-            repostedFromId: $this->input('reposted_from_id'),
+            repostedFromId: $this->filled('reposted_from_id') ? $this->integer('reposted_from_id') : null,
             postedAt: CarbonImmutable::parse($this->string('posted_at')->toString()),
             media: $this->array('media'),
             hashtags: $this->array('hashtags'),

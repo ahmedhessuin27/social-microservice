@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('post_hashtags', function (Blueprint $table): void {
             $table->uuid('id')->primary();
-            $table->foreignUuid('post_id')->constrained('posts')->cascadeOnDelete();
+            $table->foreignId('post_id')->constrained('posts')->cascadeOnDelete();
             $table->foreignUuid('hashtag_id')->constrained('hashtags')->cascadeOnDelete();
             $table->timestamps();
 

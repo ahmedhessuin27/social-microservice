@@ -37,10 +37,10 @@ endpoints:
       follower_id:
         custom: []
         name: follower_id
-        description: "The following user's id, as used by the calling backend. Must be a valid UUID."
+        description: "The following user's id, as used by the calling backend. Must be at least 1."
         required: true
-        example: 0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f
-        type: string
+        example: 42
+        type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
@@ -48,17 +48,17 @@ endpoints:
       following_id:
         custom: []
         name: following_id
-        description: "The followed user's id, as used by the calling backend. The value and <code>follower_id</code> must be different. Must be a valid UUID."
+        description: "The followed user's id, as used by the calling backend. The value and <code>follower_id</code> must be different. Must be at least 1."
         required: true
-        example: 0199c2b1-5c5c-7000-8b3a-1a2b3c4d5e6f
-        type: string
+        example: 43
+        type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      follower_id: 0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f
-      following_id: 0199c2b1-5c5c-7000-8b3a-1a2b3c4d5e6f
+      follower_id: 42
+      following_id: 43
     fileParameters: []
     responses:
       -
@@ -110,10 +110,10 @@ endpoints:
       follower_id:
         custom: []
         name: follower_id
-        description: "The following user's id, as used by the calling backend. Must be a valid UUID."
+        description: "The following user's id, as used by the calling backend. Must be at least 1."
         required: true
-        example: 0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f
-        type: string
+        example: 42
+        type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
@@ -121,17 +121,17 @@ endpoints:
       following_id:
         custom: []
         name: following_id
-        description: "The followed user's id, as used by the calling backend. The value and <code>follower_id</code> must be different. Must be a valid UUID."
+        description: "The followed user's id, as used by the calling backend. The value and <code>follower_id</code> must be different. Must be at least 1."
         required: true
-        example: 0199c2b1-5c5c-7000-8b3a-1a2b3c4d5e6f
-        type: string
+        example: 43
+        type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      follower_id: 0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f
-      following_id: 0199c2b1-5c5c-7000-8b3a-1a2b3c4d5e6f
+      follower_id: 42
+      following_id: 43
     fileParameters: []
     responses:
       -

@@ -27,7 +27,7 @@ final class PostController extends Controller
      * updates it if it does. The {id} must be the same id the calling backend
      * uses for this post — it becomes this service's primary key too.
      *
-     * @urlParam id string required The post's id, as used by the calling backend. Example: 0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f
+     * @urlParam id integer required The post's id, as used by the calling backend. Example: 1001
      *
      * @header X-Internal-Timestamp required Unix timestamp used in the HMAC signature. Example: 1735689600
      * @header X-Internal-Signature required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9
@@ -35,7 +35,7 @@ final class PostController extends Controller
      * @response 200 {"status": 200, "message": "Post synced successfully."}
      * @response 422 scenario="Validation error" {"status": 422, "message": "The given data was invalid.", "error": {"author_id": ["The author id field is required."]}}
      */
-    public function update(PostRequest $request, string $id): JsonResponse
+    public function update(PostRequest $request, int $id): JsonResponse
     {
         $this->posts->upsert($request->toDto($id));
 
@@ -47,14 +47,14 @@ final class PostController extends Controller
      *
      * Idempotent: returns 200 whether or not the post existed locally.
      *
-     * @urlParam id string required The post's id, as used by the calling backend. Example: 0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f
+     * @urlParam id integer required The post's id, as used by the calling backend. Example: 1001
      *
      * @header X-Internal-Timestamp required Unix timestamp used in the HMAC signature. Example: 1735689600
      * @header X-Internal-Signature required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9
      *
      * @response 200 {"status": 200, "message": "Post deleted successfully."}
      */
-    public function destroy(string $id): JsonResponse
+    public function destroy(int $id): JsonResponse
     {
         $this->posts->delete($id);
 

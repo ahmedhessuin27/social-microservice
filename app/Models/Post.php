@@ -6,7 +6,6 @@ namespace App\Models;
 
 use App\Enums\PostStatus;
 use App\Enums\PostType;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -16,7 +15,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Post extends Model
 {
-    use HasUuids, SoftDeletes;
+    use SoftDeletes;
+
+    // Primary key mirrors the consuming application's own integer id.
+    public $incrementing = false;
+
+    protected $keyType = 'int';
 
     protected $fillable = [
         'id',

@@ -10,6 +10,7 @@ use App\Models\Hashtag;
 use App\Models\Post;
 use App\Repositories\Contracts\PostRepositoryInterface;
 use Illuminate\Contracts\Pagination\CursorPaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
 class EloquentPostRepository implements PostRepositoryInterface
@@ -39,20 +40,33 @@ class EloquentPostRepository implements PostRepositoryInterface
         });
     }
 
-    public function delete(string $id): bool
+    public function delete(int $id): bool
     {
         return Post::whereKey($id)->delete() > 0;
     }
 
     public function feedForAuthors(array $authorIds, int $perPage): CursorPaginator
     {
-        return Post::query()
+        return $this->publishedNewestFirst()
             ->whereIn('author_id', $authorIds)
+            ->cursorPaginate($perPage);
+    }
+
+    public function latestPublished(int $perPage): CursorPaginator
+    {
+        return $this->publishedNewestFirst()->cursorPaginate($perPage);
+    }
+
+    /**
+     * @return Builder<Post>
+     */
+    private function publishedNewestFirst(): Builder
+    {
+        return Post::query()
             ->where('status', PostStatus::Published)
             ->with(['media', 'hashtags'])
             ->orderByDesc('posted_at')
-            ->orderByDesc('id')
-            ->cursorPaginate($perPage);
+            ->orderByDesc('id');
     }
 
     /**

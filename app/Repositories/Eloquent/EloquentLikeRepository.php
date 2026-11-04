@@ -22,7 +22,7 @@ class EloquentLikeRepository implements LikeRepositoryInterface
         );
     }
 
-    public function delete(string $id): bool
+    public function delete(int $id): bool
     {
         return Like::whereKey($id)->delete() > 0;
     }

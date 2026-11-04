@@ -41,6 +41,13 @@ final readonly class SignatureValidator implements SignatureValidatorInterface
             throw InvalidHmacSignatureException::invalidSignature();
         }
 
+        // Reads change no state, so replaying one gains nothing — and two
+        // identical reads in the same second (e.g. two users opening the
+        // global feed) would otherwise collide on the same signature.
+        if ($request->isMethodSafe()) {
+            return;
+        }
+
         $replayKey = 'hmac-replay:'.hash('sha256', $signature);
 
         if ($this->cache->has($replayKey)) {

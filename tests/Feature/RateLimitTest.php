@@ -29,13 +29,13 @@ final class RateLimitTest extends TestCase
         $now = time();
 
         for ($i = 0; $i < 2; $i++) {
-            $this->withHeaders($this->signedHeaders('GET', 'internal/feed/00000000-0000-0000-0000-000000000000', '[]', $now + $i))
-                ->getJson('/internal/feed/00000000-0000-0000-0000-000000000000')
+            $this->withHeaders($this->signedHeaders('GET', 'internal/feed/1', '[]', $now + $i))
+                ->getJson('/internal/feed/1')
                 ->assertStatus(200);
         }
 
-        $response = $this->withHeaders($this->signedHeaders('GET', 'internal/feed/00000000-0000-0000-0000-000000000000', '[]', $now + 2))
-            ->getJson('/internal/feed/00000000-0000-0000-0000-000000000000');
+        $response = $this->withHeaders($this->signedHeaders('GET', 'internal/feed/1', '[]', $now + 2))
+            ->getJson('/internal/feed/1');
 
         $response->assertStatus(429);
         $response->assertJson([

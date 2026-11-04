@@ -18,14 +18,14 @@ class EloquentFollowRepository implements FollowRepositoryInterface
         ]);
     }
 
-    public function delete(string $followerId, string $followingId): bool
+    public function delete(int $followerId, int $followingId): bool
     {
         return Follow::where('follower_id', $followerId)
             ->where('following_id', $followingId)
             ->delete() > 0;
     }
 
-    public function followingIds(string $userId): array
+    public function followingIds(int $userId): array
     {
         return Follow::where('follower_id', $userId)->pluck('following_id')->all();
     }

@@ -11,5 +11,10 @@ use Illuminate\Contracts\Pagination\CursorPaginator;
 #[Bind(FeedService::class)]
 interface FeedServiceInterface
 {
-    public function forUser(string $userId, int $perPage): CursorPaginator;
+    /**
+     * Every author's published posts — for consumers with no follow graph.
+     */
+    public function latest(int $perPage): CursorPaginator;
+
+    public function forUser(int $userId, int $perPage): CursorPaginator;
 }

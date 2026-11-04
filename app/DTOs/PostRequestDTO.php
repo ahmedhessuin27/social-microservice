@@ -15,15 +15,15 @@ final readonly class PostRequestDTO
      * @param  array<int, string>  $hashtags
      */
     public function __construct(
-        public string $id,
-        public string $authorId,
+        public int $id,
+        public int $authorId,
         public ?string $content,
         public PostType $type,
         public PostStatus $status,
         public int $likesCount,
         public int $commentsCount,
         public int $repostsCount,
-        public ?string $repostedFromId,
+        public ?int $repostedFromId,
         public CarbonImmutable $postedAt,
         public array $media = [],
         public array $hashtags = [],

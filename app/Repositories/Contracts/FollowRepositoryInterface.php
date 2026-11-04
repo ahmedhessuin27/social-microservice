@@ -18,10 +18,10 @@ interface FollowRepositoryInterface
      */
     public function upsert(FollowRequestDTO $data): Follow;
 
-    public function delete(string $followerId, string $followingId): bool;
+    public function delete(int $followerId, int $followingId): bool;
 
     /**
-     * @return array<int, string> ids of the users the given user follows
+     * @return array<int, int> ids of the users the given user follows
      */
-    public function followingIds(string $userId): array;
+    public function followingIds(int $userId): array;
 }

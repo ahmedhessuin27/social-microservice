@@ -18,5 +18,5 @@ interface CommentRepositoryInterface
      */
     public function upsert(CommentRequestDTO $data): Comment;
 
-    public function delete(string $id): bool;
+    public function delete(int $id): bool;
 }

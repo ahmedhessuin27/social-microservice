@@ -20,8 +20,8 @@ final class FollowRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'follower_id' => ['required', 'uuid'],
-            'following_id' => ['required', 'uuid', 'different:follower_id'],
+            'follower_id' => ['required', 'integer', 'min:1'],
+            'following_id' => ['required', 'integer', 'min:1', 'different:follower_id'],
         ];
     }
 
@@ -31,16 +31,16 @@ final class FollowRequest extends FormRequest
     public function bodyParameters(): array
     {
         return [
-            'follower_id' => ['description' => "The following user's id, as used by the calling backend.", 'example' => '0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f'],
-            'following_id' => ['description' => "The followed user's id, as used by the calling backend.", 'example' => '0199c2b1-5c5c-7000-8b3a-1a2b3c4d5e6f'],
+            'follower_id' => ['description' => "The following user's id, as used by the calling backend.", 'example' => 42],
+            'following_id' => ['description' => "The followed user's id, as used by the calling backend.", 'example' => 43],
         ];
     }
 
     public function toDto(): FollowRequestDTO
     {
         return new FollowRequestDTO(
-            followerId: $this->string('follower_id')->toString(),
-            followingId: $this->string('following_id')->toString(),
+            followerId: $this->integer('follower_id'),
+            followingId: $this->integer('following_id'),
         );
     }
 }

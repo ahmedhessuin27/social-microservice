@@ -7,7 +7,7 @@ namespace App\DTOs;
 final readonly class FollowRequestDTO
 {
     public function __construct(
-        public string $followerId,
-        public string $followingId,
+        public int $followerId,
+        public int $followingId,
     ) {}
 }

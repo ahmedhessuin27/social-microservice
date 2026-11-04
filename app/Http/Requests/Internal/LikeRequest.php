@@ -21,8 +21,8 @@ final class LikeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => ['required', 'uuid'],
-            'likeable_id' => ['required', 'uuid'],
+            'user_id' => ['required', 'integer', 'min:1'],
+            'likeable_id' => ['required', 'integer', 'min:1'],
             'likeable_type' => ['required', Rule::in(['post', 'comment'])],
         ];
     }
@@ -33,18 +33,18 @@ final class LikeRequest extends FormRequest
     public function bodyParameters(): array
     {
         return [
-            'user_id' => ['description' => "The liking user's id, as used by the calling backend.", 'example' => '0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f'],
-            'likeable_id' => ['description' => 'The id of the post or comment being liked. Must already be synced.', 'example' => '0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f'],
+            'user_id' => ['description' => "The liking user's id, as used by the calling backend.", 'example' => 42],
+            'likeable_id' => ['description' => 'The id of the post or comment being liked. Must already be synced.', 'example' => 1001],
             'likeable_type' => ['description' => 'Either "post" or "comment".', 'example' => 'post'],
         ];
     }
 
-    public function toDto(string $id): LikeRequestDTO
+    public function toDto(int $id): LikeRequestDTO
     {
         return new LikeRequestDTO(
             id: $id,
-            userId: $this->string('user_id')->toString(),
-            likeableId: $this->string('likeable_id')->toString(),
+            userId: $this->integer('user_id'),
+            likeableId: $this->integer('likeable_id'),
             likeableType: $this->string('likeable_type')->toString(),
         );
     }

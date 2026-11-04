@@ -33,24 +33,24 @@ endpoints:
         name: id
         description: "The like's id, as used by the calling backend."
         required: true
-        example: 0199c2b1-4b4b-7000-8b3a-1a2b3c4d5e6f
-        type: string
+        example: 3001
+        type: integer
         enumValues: []
         exampleWasSpecified: true
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      id: 0199c2b1-4b4b-7000-8b3a-1a2b3c4d5e6f
+      id: 3001
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
       user_id:
         custom: []
         name: user_id
-        description: "The liking user's id, as used by the calling backend. Must be a valid UUID."
+        description: "The liking user's id, as used by the calling backend. Must be at least 1."
         required: true
-        example: 0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f
-        type: string
+        example: 42
+        type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
@@ -58,10 +58,10 @@ endpoints:
       likeable_id:
         custom: []
         name: likeable_id
-        description: 'The id of the post or comment being liked. Must already be synced. Must be a valid UUID.'
+        description: 'The id of the post or comment being liked. Must already be synced. Must be at least 1.'
         required: true
-        example: 0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f
-        type: string
+        example: 1001
+        type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
@@ -80,8 +80,8 @@ endpoints:
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      user_id: 0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f
-      likeable_id: 0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f
+      user_id: 42
+      likeable_id: 1001
       likeable_type: post
     fileParameters: []
     responses:
@@ -130,14 +130,14 @@ endpoints:
         name: id
         description: "The like's id, as used by the calling backend."
         required: true
-        example: 0199c2b1-4b4b-7000-8b3a-1a2b3c4d5e6f
-        type: string
+        example: 3001
+        type: integer
         enumValues: []
         exampleWasSpecified: true
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      id: 0199c2b1-4b4b-7000-8b3a-1a2b3c4d5e6f
+      id: 3001
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []

@@ -17,8 +17,8 @@ return new class extends Migration
             // Locally generated id: the sync endpoint (PUT/DELETE /internal/follows)
             // is keyed by the (follower_id, following_id) pair, not a path {id}.
             $table->uuid('id')->primary();
-            $table->uuid('follower_id');
-            $table->uuid('following_id');
+            $table->unsignedBigInteger('follower_id');
+            $table->unsignedBigInteger('following_id');
             $table->timestamps();
 
             $table->unique(['follower_id', 'following_id']);

@@ -34,24 +34,24 @@ endpoints:
         name: id
         description: "The post's id, as used by the calling backend."
         required: true
-        example: 0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f
-        type: string
+        example: 1001
+        type: integer
         enumValues: []
         exampleWasSpecified: true
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      id: 0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f
+      id: 1001
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
       author_id:
         custom: []
         name: author_id
-        description: "The post author's id, as used by the calling backend. Must be a valid UUID."
+        description: "The post author's id, as used by the calling backend. Must be at least 1."
         required: true
-        example: 0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f
-        type: string
+        example: 42
+        type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
@@ -132,10 +132,10 @@ endpoints:
       reposted_from_id:
         custom: []
         name: reposted_from_id
-        description: 'If this is a repost, the id of the original post (must already be synced). Must be a valid UUID.'
+        description: 'If this is a repost, the id of the original post (must already be synced). Must be at least 1.'
         required: false
         example: null
-        type: string
+        type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: true
@@ -197,7 +197,7 @@ endpoints:
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      author_id: 0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f
+      author_id: 42
       content: 'Hello world'
       type: text
       status: published
@@ -258,14 +258,14 @@ endpoints:
         name: id
         description: "The post's id, as used by the calling backend."
         required: true
-        example: 0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f
-        type: string
+        example: 1001
+        type: integer
         enumValues: []
         exampleWasSpecified: true
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      id: 0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f
+      id: 1001
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []

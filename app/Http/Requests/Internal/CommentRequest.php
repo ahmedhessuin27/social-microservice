@@ -20,10 +20,10 @@ final class CommentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'post_id' => ['required', 'uuid'],
-            'author_id' => ['required', 'uuid'],
+            'post_id' => ['required', 'integer', 'min:1'],
+            'author_id' => ['required', 'integer', 'min:1'],
             'text' => ['required', 'string'],
-            'parent_id' => ['nullable', 'uuid'],
+            'parent_id' => ['nullable', 'integer', 'min:1'],
             'likes_count' => ['required', 'integer', 'min:0'],
             'replies_count' => ['required', 'integer', 'min:0'],
         ];
@@ -35,8 +35,8 @@ final class CommentRequest extends FormRequest
     public function bodyParameters(): array
     {
         return [
-            'post_id' => ['description' => 'The id of the post this comment belongs to. Must already be synced.', 'example' => '0199c2b1-2f2b-7000-8b3a-1a2b3c4d5e6f'],
-            'author_id' => ['description' => "The comment author's id, as used by the calling backend.", 'example' => '0199c2b1-1a1a-7000-8b3a-1a2b3c4d5e6f'],
+            'post_id' => ['description' => 'The id of the post this comment belongs to. Must already be synced.', 'example' => 1001],
+            'author_id' => ['description' => "The comment author's id, as used by the calling backend.", 'example' => 42],
             'text' => ['description' => 'The comment text.', 'example' => 'Nice post!'],
             'parent_id' => ['description' => "If this is a reply, the parent comment's id.", 'example' => null],
             'likes_count' => ['description' => 'Current like count, as tracked by the calling backend.', 'example' => 0],
@@ -44,14 +44,14 @@ final class CommentRequest extends FormRequest
         ];
     }
 
-    public function toDto(string $id): CommentRequestDTO
+    public function toDto(int $id): CommentRequestDTO
     {
         return new CommentRequestDTO(
             id: $id,
-            postId: $this->string('post_id')->toString(),
-            authorId: $this->string('author_id')->toString(),
+            postId: $this->integer('post_id'),
+            authorId: $this->integer('author_id'),
             text: $this->string('text')->toString(),
-            parentId: $this->input('parent_id'),
+            parentId: $this->filled('parent_id') ? $this->integer('parent_id') : null,
             likesCount: $this->integer('likes_count'),
             repliesCount: $this->integer('replies_count'),
         );

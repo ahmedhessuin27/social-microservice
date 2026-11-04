@@ -15,12 +15,17 @@ interface PostRepositoryInterface
 {
     public function upsert(PostRequestDTO $data): Post;
 
-    public function delete(string $id): bool;
+    public function delete(int $id): bool;
 
     /**
      * Posts by the given authors, published, newest first.
      *
-     * @param  array<int, string>  $authorIds
+     * @param  array<int, int>  $authorIds
      */
     public function feedForAuthors(array $authorIds, int $perPage): CursorPaginator;
+
+    /**
+     * Every author's posts, published, newest first.
+     */
+    public function latestPublished(int $perPage): CursorPaginator;
 }

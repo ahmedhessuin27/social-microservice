@@ -18,5 +18,5 @@ interface LikeRepositoryInterface
      */
     public function upsert(LikeRequestDTO $data): Like;
 
-    public function delete(string $id): bool;
+    public function delete(int $id): bool;
 }

@@ -6,7 +6,6 @@ namespace Tests\Feature;
 
 use App\Services\Contracts\HmacSignerInterface;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Str;
 use Tests\TestCase;
 
 final class HmacFlowTest extends TestCase
@@ -29,10 +28,10 @@ final class HmacFlowTest extends TestCase
 
     public function test_full_sync_and_feed_flow_through_real_routes_with_hmac(): void
     {
-        $me = (string) Str::uuid();
-        $friend = (string) Str::uuid();
-        $postId = (string) Str::uuid();
-        $friendPostId = (string) Str::uuid();
+        $me = 1;
+        $friend = 2;
+        $postId = 101;
+        $friendPostId = 102;
 
         $this->putJson("/internal/posts/{$postId}", [])->assertStatus(401);
 
@@ -76,5 +75,40 @@ final class HmacFlowTest extends TestCase
         $deleteHeaders = $this->signedHeaders('DELETE', "internal/posts/{$postId}", '[]');
         $this->withHeaders($deleteHeaders)->deleteJson("/internal/posts/{$postId}")->assertStatus(200);
         $this->withHeaders($deleteHeaders)->deleteJson("/internal/posts/{$postId}")->assertStatus(401);
+    }
+
+    public function test_global_feed_returns_every_authors_published_posts_without_any_follows(): void
+    {
+        $posts = [
+            201 => ['author_id' => 1, 'status' => 'published', 'posted_at' => now()->subMinutes(2)],
+            202 => ['author_id' => 2, 'status' => 'published', 'posted_at' => now()->subMinute()],
+            203 => ['author_id' => 3, 'status' => 'draft', 'posted_at' => now()],
+        ];
+
+        foreach ($posts as $id => $post) {
+            $payload = [
+                'author_id' => $post['author_id'], 'content' => "post {$id}", 'type' => 'text', 'status' => $post['status'],
+                'likes_count' => 0, 'comments_count' => 0, 'reposts_count' => 0, 'reposted_from_id' => null,
+                'posted_at' => $post['posted_at']->toISOString(),
+            ];
+            $body = json_encode($payload);
+            $this->withHeaders($this->signedHeaders('PUT', "internal/posts/{$id}", $body))
+                ->putJson("/internal/posts/{$id}", $payload)
+                ->assertStatus(200);
+        }
+
+        $response = $this->withHeaders($this->signedHeaders('GET', 'internal/feed', '[]'))
+            ->getJson('/internal/feed')
+            ->assertStatus(200);
+
+        $this->assertSame([202, 201], array_column($response->json('data'), 'id'));
+    }
+
+    public function test_identical_reads_in_the_same_second_are_not_rejected_as_replays(): void
+    {
+        $headers = $this->signedHeaders('GET', 'internal/feed', '[]');
+
+        $this->withHeaders($headers)->getJson('/internal/feed')->assertStatus(200);
+        $this->withHeaders($headers)->getJson('/internal/feed')->assertStatus(200);
     }
 }

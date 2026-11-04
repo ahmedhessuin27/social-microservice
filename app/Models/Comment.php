@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,7 +12,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Comment extends Model
 {
-    use HasUuids, SoftDeletes;
+    use SoftDeletes;
+
+    // Primary key mirrors the consuming application's own integer id.
+    public $incrementing = false;
+
+    protected $keyType = 'int';
 
     protected $fillable = [
         'id',
