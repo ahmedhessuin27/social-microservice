@@ -18,7 +18,9 @@ class EloquentPostRepository implements PostRepositoryInterface
     public function upsert(PostRequestDTO $data): Post
     {
         return DB::transaction(function () use ($data): Post {
-            $post = Post::query()->updateOrCreate(
+            // withTrashed: a re-sync of a previously deleted id must revive
+            // that row, not insert a second one under the same primary key.
+            $post = Post::withTrashed()->updateOrCreate(
                 ['id' => $data->id],
                 [
                     'author_id' => $data->authorId,
@@ -32,6 +34,10 @@ class EloquentPostRepository implements PostRepositoryInterface
                     'posted_at' => $data->postedAt,
                 ],
             );
+
+            if ($post->trashed()) {
+                $post->restore();
+            }
 
             $this->replaceMedia($post, $data->media);
             $this->replaceHashtags($post, $data->hashtags);

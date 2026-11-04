@@ -12,7 +12,9 @@ class EloquentCommentRepository implements CommentRepositoryInterface
 {
     public function upsert(CommentRequestDTO $data): Comment
     {
-        return Comment::query()->updateOrCreate(
+        // withTrashed: a re-sync of a previously deleted id must revive
+        // that row, not insert a second one under the same primary key.
+        $comment = Comment::withTrashed()->updateOrCreate(
             ['id' => $data->id],
             [
                 'post_id' => $data->postId,
@@ -23,6 +25,12 @@ class EloquentCommentRepository implements CommentRepositoryInterface
                 'replies_count' => $data->repliesCount,
             ],
         );
+
+        if ($comment->trashed()) {
+            $comment->restore();
+        }
+
+        return $comment;
     }
 
     public function delete(int $id): bool

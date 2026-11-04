@@ -104,6 +104,38 @@ final class HmacFlowTest extends TestCase
         $this->assertSame([202, 201], array_column($response->json('data'), 'id'));
     }
 
+    public function test_resyncing_a_deleted_post_and_comment_restores_them(): void
+    {
+        $postPayload = [
+            'author_id' => 1, 'content' => 'back again', 'type' => 'text', 'status' => 'published',
+            'likes_count' => 0, 'comments_count' => 1, 'reposts_count' => 0, 'reposted_from_id' => null,
+            'posted_at' => now()->toISOString(),
+        ];
+        $commentPayload = [
+            'post_id' => 301, 'author_id' => 2, 'text' => 'hi', 'parent_id' => null,
+            'likes_count' => 0, 'replies_count' => 0,
+        ];
+
+        $sync = function (string $method, string $path, ?array $payload = null) {
+            $body = $payload === null ? '[]' : json_encode($payload);
+
+            return $this->withHeaders($this->signedHeaders($method, $path, $body))
+                ->json($method, "/{$path}", $payload ?? []);
+        };
+
+        $sync('PUT', 'internal/posts/301', $postPayload)->assertStatus(200);
+        $sync('PUT', 'internal/comments/401', $commentPayload)->assertStatus(200);
+        $sync('DELETE', 'internal/comments/401')->assertStatus(200);
+        $sync('DELETE', 'internal/posts/301')->assertStatus(200);
+
+        // Each re-sync is a different body from the original PUT, so it isn't a replay.
+        $sync('PUT', 'internal/posts/301', [...$postPayload, 'likes_count' => 1])->assertStatus(200);
+        $sync('PUT', 'internal/comments/401', [...$commentPayload, 'likes_count' => 1])->assertStatus(200);
+
+        $this->assertSame([301], array_column($sync('GET', 'internal/feed')->json('data'), 'id'));
+        $this->assertDatabaseHas('comments', ['id' => 401, 'deleted_at' => null, 'likes_count' => 1]);
+    }
+
     public function test_identical_reads_in_the_same_second_are_not_rejected_as_replays(): void
     {
         $headers = $this->signedHeaders('GET', 'internal/feed', '[]');
