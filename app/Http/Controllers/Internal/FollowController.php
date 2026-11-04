@@ -37,7 +37,7 @@ final class FollowController extends Controller
     {
         $this->follows->upsert($request->toDto());
 
-        return response()->api(__('sync.follow_synced'), 200);
+        return response()->api(__('social.follow_synced'), 200);
     }
 
     /**
@@ -56,6 +56,6 @@ final class FollowController extends Controller
 
         $this->follows->delete($dto->followerId, $dto->followingId);
 
-        return response()->api(__('sync.follow_deleted'), 200);
+        return response()->api(__('social.follow_deleted'), 200);
     }
 }

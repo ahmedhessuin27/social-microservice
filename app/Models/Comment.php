@@ -14,13 +14,7 @@ class Comment extends Model
 {
     use SoftDeletes;
 
-    // Primary key mirrors the consuming application's own integer id.
-    public $incrementing = false;
-
-    protected $keyType = 'int';
-
     protected $fillable = [
-        'id',
         'post_id',
         'author_id',
         'text',
@@ -32,6 +26,9 @@ class Comment extends Model
     protected function casts(): array
     {
         return [
+            'post_id' => 'integer',
+            'author_id' => 'integer',
+            'parent_id' => 'integer',
             'likes_count' => 'integer',
             'replies_count' => 'integer',
         ];

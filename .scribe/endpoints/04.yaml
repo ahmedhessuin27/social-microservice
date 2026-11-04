@@ -35,33 +35,33 @@ endpoints:
     urlParameters: []
     cleanUrlParameters: []
     queryParameters:
-      per_page:
+      viewer_id:
         custom: []
-        name: per_page
-        description: 'Number of posts per page (1-50). Defaults to 15.'
+        name: viewer_id
+        description: 'The id of the user viewing, as used by the calling backend. Adds a "liked" flag to each item. Must be at least 1.'
         required: false
-        example: 15
-        type: integer
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-    cleanQueryParameters:
-      per_page: 15
-    bodyParameters:
-      per_page:
-        custom: []
-        name: per_page
-        description: 'Must be at least 1. Must not be greater than 50.'
-        required: false
-        example: 1
+        example: 42
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-    cleanBodyParameters:
-      per_page: 1
+      per_page:
+        custom: []
+        name: per_page
+        description: 'Number of items per page (1-50). Defaults to 15. Must be at least 1. Must not be greater than 50.'
+        required: false
+        example: 15
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      viewer_id: 42
+      per_page: 15
+    bodyParameters: []
+    cleanBodyParameters: []
     fileParameters: []
     responses:
       -
@@ -145,33 +145,33 @@ endpoints:
     cleanUrlParameters:
       userId: 42
     queryParameters:
-      per_page:
+      viewer_id:
         custom: []
-        name: per_page
-        description: 'Number of posts per page (1-50). Defaults to 15.'
+        name: viewer_id
+        description: 'The id of the user viewing, as used by the calling backend. Adds a "liked" flag to each item. Must be at least 1.'
         required: false
-        example: 15
-        type: integer
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-    cleanQueryParameters:
-      per_page: 15
-    bodyParameters:
-      per_page:
-        custom: []
-        name: per_page
-        description: 'Must be at least 1. Must not be greater than 50.'
-        required: false
-        example: 1
+        example: 42
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-    cleanBodyParameters:
-      per_page: 1
+      per_page:
+        custom: []
+        name: per_page
+        description: 'Number of items per page (1-50). Defaults to 15. Must be at least 1. Must not be greater than 50.'
+        required: false
+        example: 15
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      viewer_id: 42
+      per_page: 15
+    bodyParameters: []
+    cleanBodyParameters: []
     fileParameters: []
     responses:
       -
@@ -209,6 +209,81 @@ endpoints:
           }
         headers: []
         description: ''
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'internal/users/{userId}/posts'
+    metadata:
+      custom: []
+      groupName: Feed
+      groupDescription: |-
+
+        Read published posts, newest first: either every author's posts (for
+        consumers with no follow system) or one user's merged feed (own posts +
+        followed users' posts).
+      subgroup: ''
+      subgroupDescription: ''
+      title: "Get a user's posts"
+      description: |-
+        One user's published posts, newest first, cursor-paginated — e.g. for
+        a profile page.
+      authenticated: false
+      deprecated: false
+    headers:
+      X-Internal-Timestamp: 'required Unix timestamp used in the HMAC signature. Example: 1735689600'
+      X-Internal-Signature: 'required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      userId:
+        custom: []
+        name: userId
+        description: "The author's id, as used by the calling backend."
+        required: true
+        example: 42
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      userId: 42
+    queryParameters:
+      viewer_id:
+        custom: []
+        name: viewer_id
+        description: 'The id of the user viewing, as used by the calling backend. Adds a "liked" flag to each item. Must be at least 1.'
+        required: false
+        example: 42
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      per_page:
+        custom: []
+        name: per_page
+        description: 'Number of items per page (1-50). Defaults to 15. Must be at least 1. Must not be greater than 50.'
+        required: false
+        example: 15
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      viewer_id: 42
+      per_page: 15
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
     responseFields: []
     auth: []
     controller: null

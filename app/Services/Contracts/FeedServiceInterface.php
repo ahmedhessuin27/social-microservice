@@ -14,7 +14,12 @@ interface FeedServiceInterface
     /**
      * Every author's published posts — for consumers with no follow graph.
      */
-    public function latest(int $perPage): CursorPaginator;
+    public function latest(int $perPage, ?int $viewerId = null): CursorPaginator;
 
-    public function forUser(int $userId, int $perPage): CursorPaginator;
+    public function forUser(int $userId, int $perPage, ?int $viewerId = null): CursorPaginator;
+
+    /**
+     * One author's published posts, e.g. for a profile page.
+     */
+    public function byAuthor(int $authorId, int $perPage, ?int $viewerId = null): CursorPaginator;
 }

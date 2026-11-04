@@ -1,10 +1,11 @@
 # Feed Microservice
 
-A standalone, reusable Feed Microservice built on Laravel 13. It maintains its own copy of posts, comments,
-likes, and follow relationships — synced in from any Laravel backend via idempotent, HMAC-authenticated
-internal APIs — and serves a paginated, newest-first feed: either a global feed of every author's posts (for
-backends with no follow system) or a merged feed per user. It never shares a database or models with the
-application(s) it serves.
+A standalone, reusable social-feed microservice built on Laravel 13. It is the **source of truth** for posts,
+comments (with one level of replies) and likes: it assigns their ids, keeps their like/comment/reply/repost
+counts, and enforces who may edit or delete what. It serves a paginated, newest-first feed: either a global
+feed of every author's posts (for backends with no follow system) or a merged feed per user. Users
+themselves stay in the calling backend: this service only ever sees their integer ids. It never shares a
+database or models with the application(s) it serves.
 
 Deploying to a server? See [DEPLOYMENT.md](DEPLOYMENT.md).
 
@@ -42,24 +43,25 @@ php artisan serve
 
 ```
 app/
-  DTOs/                    Value objects carrying validated sync payloads into repositories
+  DTOs/                    Value objects carrying validated create/update payloads into repositories
   Enums/                   PostType, PostStatus
   Exceptions/              InvalidHmacSignatureException (self-rendering), ApiExceptionRenderer
   Http/
     Controllers/Internal/  Thin controllers — validate, call repository/service, respond
     Requests/Internal/     Form Requests (validation + toDto()/bodyParameters() for docs)
-    Resources/             BaseResource (uniform envelope), PostResource
-  Models/                  Post, Comment, Like keyed by the consumer's integer ids; locally created rows use UUIDs
+    Resources/             BaseResource (uniform envelope), PostResource, CommentResource
+  Models/                  Post, Comment, Like (auto-increment ids), Follow, Hashtag, PostMedia (UUIDs)
   Providers/               AppServiceProvider (morph map, rate limiter), ResponseMacroServiceProvider
   Repositories/
     Contracts/             Interfaces, bound via #[Bind(...)] attributes — no manual provider wiring
-    Eloquent/               Implementations
+    Eloquent/               Implementations — writes and counter updates share one transaction
   Services/
     Hmac/                  HmacSigner (sign outgoing), SignatureValidator (verify incoming)
     FeedService.php         Global feed, or own + followed authors' posts
 config/internal-api.php    HMAC secret, tolerance, replay TTL, rate limit — all env-driven
 routes/internal.php        All internal/* routes, HMAC + rate-limited (see bootstrap/app.php)
 lang/{en,ar}/               Every API message is localized (Accept-Language header)
+client/                    Ready-to-copy FeedClient, controller and routes for a consuming Laravel app
 ```
 
 ## Integrating a Laravel backend with this service
@@ -79,67 +81,55 @@ The canonical string to sign:
 {METHOD}\n{PATH}\n{TIMESTAMP}\n{RAW_BODY}
 ```
 
-- `METHOD` — uppercase (`PUT`, `DELETE`, `GET`).
-- `PATH` — no leading slash, no query string. Example: `internal/posts/1001`.
+- `METHOD` — uppercase (`POST`, `PUT`, `DELETE`, `GET`).
+- `PATH` — no leading slash, no query string. Example: `internal/posts/1001/comments`.
 - `TIMESTAMP` — the exact same value sent in `X-Internal-Timestamp`.
 - `RAW_BODY` — the exact raw request body bytes (empty string for a bodyless request).
 
-A minimal PHP example (no dependency on this codebase — any Laravel app can do this with nothing but `hash_hmac`):
-
-```php
-$secret = config('services.feed_microservice.secret');
-$method = 'PUT';
-$path = 'internal/posts/'.$post->id;
-$timestamp = (string) time();
-$body = json_encode([
-    'author_id' => $post->user_id,
-    'content' => $post->content,
-    'type' => 'text',
-    'status' => 'published',
-    'likes_count' => $post->likes_count,
-    'comments_count' => $post->comments_count,
-    'reposts_count' => $post->reposts_count,
-    'reposted_from_id' => $post->reposted_from_id,
-    'posted_at' => $post->created_at->toIso8601String(),
-]);
-
-$signature = hash_hmac('sha256', implode("\n", [$method, $path, $timestamp, $body]), $secret);
-
-Http::withHeaders([
-    'X-Internal-Timestamp' => $timestamp,
-    'X-Internal-Signature' => $signature,
-])->withBody($body, 'application/json')
-    ->put(config('services.feed_microservice.url')."/{$path}");
-```
+A complete client that does this is in [client/FeedClient.php](client/FeedClient.php); it needs nothing but
+Laravel's `Http` facade and `hash_hmac`.
 
 Requests are rejected if the timestamp drifts more than `INTERNAL_API_TIMESTAMP_TOLERANCE` seconds (default
-300) from this server's clock, or — for writes (PUT/DELETE) — if the exact same signature has already been
-seen within `INTERNAL_API_REPLAY_TTL` seconds (default 600). Replay protection needs no extra header from the
-caller; reads (GET) are exempt, since they change nothing and identical concurrent reads must not collide.
+300) from this server's clock, or — for writes (POST/PUT/DELETE) — if the exact same signature has already
+been seen within `INTERNAL_API_REPLAY_TTL` seconds (default 600). Replay protection needs no extra header from
+the caller; reads (GET) are exempt, since they change nothing and identical concurrent reads must not collide.
+To send two identical writes within one second (a double-tapped like), add any unique field to the body —
+`FeedClient` adds `_nonce`; unknown fields are ignored.
 
-### 2. Sync data in
+### 2. Say who is acting
 
-Call these whenever the corresponding entity changes in your app. All are idempotent — safe to retry or
-call more than once with the same id. Every id (post, comment, like, user) is your app's own positive
-integer id.
+This service has no users of its own. Your backend passes its logged-in user's id with every call — never an
+id taken from the app's request — and this service enforces ownership with `403`:
 
-- `PUT/DELETE /internal/posts/{id}` — `{id}` is your own post id.
-- `PUT/DELETE /internal/comments/{id}` — parent post must already be synced.
-- `PUT/DELETE /internal/likes/{id}` — `likeable_type` is `post` or `comment`; the target must already be synced.
-- `PUT/DELETE /internal/follows` — keyed by `(follower_id, following_id)` in the body, not a path `{id}`.
+| Field | Sent on | Meaning |
+|---|---|---|
+| `author_id` | creating a post or comment | the new item's author |
+| `user_id` | editing, deleting, liking, unliking | the user performing the action |
+| `viewer_id` (query) | reads | adds a `liked` flag to each item; lets an author see their own drafts |
 
-Media and hashtags are embedded directly in the post payload and fully replaced on each sync — they have no
-separate endpoints.
+### 3. Endpoints
 
-### 3. Read the feed
+| Method & path | What it does |
+|---|---|
+| `POST /internal/posts` | Create a post. Returns it, with its new `id`. |
+| `GET /internal/posts/{id}` | One post. Drafts/hidden posts only for their author. |
+| `PUT /internal/posts/{id}` | Edit (author only). Fields left out stay unchanged; `media`/`hashtags` are replaced when sent. |
+| `DELETE /internal/posts/{id}` | Delete (author only). |
+| `GET /internal/feed` | Global feed: every author's published posts, newest first. |
+| `GET /internal/feed/{userId}` | Merged feed: the user's own posts plus users they follow (requires follows). |
+| `GET /internal/users/{userId}/posts` | One author's published posts. |
+| `GET /internal/posts/{id}/comments` | Top-level comments, oldest first; `?parent_id=` for a comment's replies. |
+| `POST /internal/posts/{id}/comments` | Comment, or reply with `parent_id` (replies are one level deep). |
+| `PUT /internal/comments/{id}` | Edit a comment (author only). |
+| `DELETE /internal/comments/{id}` | Delete a comment and its replies (comment author or post author). |
+| `PUT` / `DELETE /internal/posts/{id}/likes` | Like / unlike a post. Idempotent; returns `liked` and `likes_count`. |
+| `PUT` / `DELETE /internal/comments/{id}/likes` | Like / unlike a comment. |
+| `PUT` / `DELETE /internal/follows` | Follow / unfollow, keyed by `(follower_id, following_id)` in the body. |
 
-- `GET /internal/feed?per_page=15` — global feed: every author's published posts, newest first. Use this if
-  your app has no follow/following system.
-- `GET /internal/feed/{userId}?per_page=15` — merged feed: the user's own posts plus posts by users they
-  follow (requires syncing follows).
-
-Both are published-only and cursor-paginated. Follow `links.next` for subsequent pages. Posts carry only
-`author_id` — your app attaches author names/avatars from its own users table.
+Lists are cursor-paginated (`per_page` 1–50, default 15): pass the response's `next_cursor` as `?cursor=` for
+the next page. Posts and comments carry only `author_id` — your app attaches names/avatars from its own users
+table (the controller in [client/](client/) does this). Media is sent as public URLs: upload files in your
+app (or to S3) first.
 
 ### 4. Language of error/validation messages
 
@@ -152,5 +142,6 @@ errors — no other integration is required.
 php artisan test
 ```
 
-`tests/Feature/` includes an end-to-end HMAC + sync + feed flow test, exception-rendering tests, and a
-rate-limit test — all run against an in-memory SQLite database, independent of your local MySQL setup.
+`tests/Feature/` covers the full post/comment/like API (ownership, visibility, counters, idempotency), the
+HMAC + replay flow, exception rendering, and rate limiting — all against an in-memory SQLite database,
+independent of your local MySQL setup.

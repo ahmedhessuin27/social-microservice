@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Repositories\Contracts\PostRepositoryInterface;
 use App\Services\Contracts\HmacSignerInterface;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use RuntimeException;
 use Tests\TestCase;
 
 final class ExceptionRenderingTest extends TestCase
@@ -36,11 +38,10 @@ final class ExceptionRenderingTest extends TestCase
 
     public function test_invalid_payload_returns_api_shaped_422_with_field_errors(): void
     {
-        $id = 1;
         $body = json_encode(['type' => 'bogus']);
 
-        $response = $this->withHeaders($this->signedHeaders('PUT', "internal/posts/{$id}", $body))
-            ->putJson("/internal/posts/{$id}", json_decode($body, true));
+        $response = $this->withHeaders($this->signedHeaders('POST', 'internal/posts', $body))
+            ->postJson('/internal/posts', json_decode($body, true));
 
         $response->assertStatus(422);
         $response->assertJsonPath('status', 422);
@@ -60,19 +61,16 @@ final class ExceptionRenderingTest extends TestCase
     {
         config(['app.debug' => false]);
 
-        // reposted_from_id passes integer validation but points at a post that
-        // doesn't exist, tripping the FK constraint -> QueryException,
-        // exercising the generic Throwable -> 500 branch.
-        $id = 1;
-        $body = json_encode([
-            'author_id' => 1, 'content' => 'x', 'type' => 'text', 'status' => 'published',
-            'likes_count' => 0, 'comments_count' => 0, 'reposts_count' => 0,
-            'reposted_from_id' => 999,
-            'posted_at' => now()->toISOString(),
-        ]);
+        // A database failure deep in the repository exercises the generic
+        // Throwable -> 500 branch.
+        $this->mock(PostRepositoryInterface::class)
+            ->shouldReceive('create')
+            ->andThrow(new RuntimeException('SQLSTATE[HY000]: connection lost'));
 
-        $response = $this->withHeaders($this->signedHeaders('PUT', "internal/posts/{$id}", $body))
-            ->putJson("/internal/posts/{$id}", json_decode($body, true));
+        $body = json_encode(['author_id' => 1, 'content' => 'x', 'type' => 'text']);
+
+        $response = $this->withHeaders($this->signedHeaders('POST', 'internal/posts', $body))
+            ->postJson('/internal/posts', json_decode($body, true));
 
         $response->assertStatus(500);
         $response->assertJson([

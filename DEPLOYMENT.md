@@ -1,107 +1,100 @@
 # Deployment
 
-How to deploy this service to the cPanel/WHM VPS (`vps.pomac.info`, AlmaLinux 9, Apache + LSAPI) and connect a
-consuming backend running on a **different** server.
+How this service is deployed on the cPanel/WHM VPS (`vps.pomac.info`, AlmaLinux 9, Apache + LSAPI), and how a
+consuming Laravel app on a **different** server connects to it.
 
 ```
- Other project (server A)                       Feed microservice (vps.pomac.info)
- ───────────────────────                        ─────────────────────────────────
- post created/updated/deleted ── PUT/DELETE ──▶ https://feed.pomac.info/internal/posts/{id}
- app feed screen              ── GET ─────────▶ https://feed.pomac.info/internal/feed
-                                 (HMAC-signed, shared INTERNAL_API_SECRET)
+ Mobile/web app ──login──▶ Other project (server A)            Feed microservice (this VPS)
+                           routes/api.php: /api/social/...      https://socialmedia.pomac.info
+                           SocialController + FeedClient ─────▶ /internal/...  (HMAC-signed, shared secret)
+                           (adds the logged-in user's id)       stores posts, comments, likes, counts
 ```
 
-The examples below use the subdomain `feed.pomac.info`, the cPanel account `pomacinf` and the app directory
-`/home/pomacinf/feed-microservice`. Change them as needed.
+| | |
+|---|---|
+| URL | `https://socialmedia.pomac.info` |
+| Code | `/home/pomacinf/public_html/socialmedia` (cPanel account `pomacinf`) |
+| Document root | `/home/pomacinf/public_html/socialmedia/public` |
+| Repository | <https://github.com/ahmedhessuin27/social-microservice> (public) |
+| Database | `pomacinf_feed_db`, user `pomacinf_pomacinf_feed` |
+| DNS | Cloudflare (`pomac.info` zone), A record `socialmedia` → the VPS IP |
 
-## 1. Server prerequisites (as root, once)
+## 1. Server prerequisites (root, once)
 
-**PHP 8.3+**: WHM → *EasyApache 4* → *Customize*. Make sure `ea-php83` is installed with these extensions:
-`bcmath`, `ctype`, `curl`, `fileinfo`, `intl`, `mbstring`, `mysqlnd`, `pdo`, `posix`, `tokenizer`, `xml`, `zip`.
-To check:
+- **PHP 8.3** (`ea-php83`) with `bcmath`, `ctype`, `curl`, `fileinfo`, `intl`, `mbstring`, `mysqlnd`, `pdo`,
+  `posix`, `tokenizer`, `xml`, `zip` (WHM → *EasyApache 4*). Check: `/opt/cpanel/ea-php83/root/usr/bin/php -m`.
+- **Redis**: `dnf install -y redis && systemctl enable --now redis`, then `redis-cli ping` → `PONG`. Other
+  projects share it, so this service uses Redis databases `2` and `3` (see `.env` below).
+- **Composer** for `pomacinf`, once:
+  ```bash
+  su -s /bin/bash - pomacinf
+  php83() { /opt/cpanel/ea-php83/root/usr/bin/php "$@"; }
+  php83 -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+  php83 composer-setup.php --install-dir=$HOME/bin --filename=composer && rm composer-setup.php
+  ```
+
+## 2. Protect `public_html`
+
+Several Laravel projects live inside `public_html`, which is also `pomac.info`'s web root, so their `.env`
+files were downloadable at `pomac.info/<project>/.env`. This block at the **top** of
+`/home/pomacinf/public_html/.htaccess` blocks that for every project, and blocks this one entirely through
+`pomac.info`:
+
+```apache
+# Never serve .env / .git files from any project under public_html
+RedirectMatch 404 /\.(env|git)
+<FilesMatch "^\.(env|git)">
+    Require all denied
+</FilesMatch>
+# socialmedia is only served via socialmedia.pomac.info, never via pomac.info/socialmedia/
+RedirectMatch 404 ^/socialmedia/
+```
+
+Check from anywhere: `curl -I https://pomac.info/socialmedia/.env` must return 403 or 404, never 200.
+
+## 3. Subdomain, PHP version, DNS, SSL
+
+1. **cPanel → Domains → Create A New Domain**: `socialmedia.pomac.info`, *Share document root* unticked.
+   Then **Manage** → document root `public_html/socialmedia/public`.
+2. **cPanel → MultiPHP Manager**: `socialmedia.pomac.info` → **PHP 8.3**. cPanel records this in
+   `public/.htaccess`, so `git status` shows that file as modified — expected; don't commit or revert it.
+3. **Cloudflare → pomac.info → DNS**: A record `socialmedia` → the VPS IP (`curl -s ifconfig.me` on the VPS).
+   Prefer **DNS only** (grey cloud) for a server-to-server API: behind the proxy, every request appears to
+   come from Cloudflare's IPs, which makes the per-IP rate limit meaningless.
+4. **cPanel → SSL/TLS Status** → *Run AutoSSL* for `socialmedia.pomac.info` (needed for HTTPS with the grey cloud).
+
+## 4. First install (as `pomacinf`)
 
 ```bash
-/opt/cpanel/ea-php83/root/usr/bin/php -v
-/opt/cpanel/ea-php83/root/usr/bin/php -m
-```
-
-**Redis** (cache, HMAC replay protection, rate limiting). The app uses `predis`, so no PHP extension is needed:
-
-```bash
-dnf install -y redis
-systemctl enable --now redis
-redis-cli ping            # → PONG
-```
-
-Redis listens on `127.0.0.1` only by default. Keep it that way.
-
-## 2. cPanel setup (account `pomacinf`)
-
-1. **Domains** → *Create A New Domain*: `feed.pomac.info`, with the document root set to
-   `/home/pomacinf/feed-microservice/public`. Untick "Share document root". The document root must be
-   `public/` and never the project folder, or `.env` becomes downloadable.
-2. **MultiPHP Manager**: set `feed.pomac.info` to **PHP 8.3**.
-3. **MySQL® Databases**: create database `pomacinf_feed` and user `pomacinf_feed`, then add the user to the
-   database with **ALL PRIVILEGES**.
-4. **SSL/TLS Status**: run AutoSSL for `feed.pomac.info`. Wait until DNS for the subdomain resolves to this
-   server first.
-
-## 3. Get the code onto the server (SSH as `pomacinf`, not root)
-
-The repository ([ahmedhessuin27/social-microservice](https://github.com/ahmedhessuin27/social-microservice))
-is public, so no SSH key is needed to clone or pull:
-
-```bash
-git clone https://github.com/ahmedhessuin27/social-microservice.git ~/feed-microservice
-cd ~/feed-microservice
-```
-
-If the repository is made private later, give the server a read-only deploy key and switch the remote to SSH:
-
-```bash
-ssh-keygen -t ed25519 -f ~/.ssh/feed_deploy -N ""
-cat ~/.ssh/feed_deploy.pub    # GitHub → ahmedhessuin27/social-microservice → Settings → Deploy keys → Add
-cat >> ~/.ssh/config <<'EOF'
-Host github-social
-    HostName github.com
-    IdentityFile ~/.ssh/feed_deploy
-EOF
-
-git remote set-url origin git@github-social:ahmedhessuin27/social-microservice.git
-```
-
-Use the cPanel PHP 8.3 binary explicitly. The default `php` on the PATH may be a different version:
-
-```bash
-alias php83=/opt/cpanel/ea-php83/root/usr/bin/php
-php83 /opt/cpanel/composer/bin/composer install --no-dev --optimize-autoloader
-```
-
-## 4. Configure `.env`
-
-```bash
+su -s /bin/bash - pomacinf
+php83() { /opt/cpanel/ea-php83/root/usr/bin/php "$@"; }
+git clone https://github.com/ahmedhessuin27/social-microservice.git ~/public_html/socialmedia
+cd ~/public_html/socialmedia
+php83 ~/bin/composer install --no-dev --optimize-autoloader
 cp .env.example .env
 php83 artisan key:generate
-openssl rand -hex 32          # → INTERNAL_API_SECRET (give the same value to the other project)
+openssl rand -hex 32          # → INTERNAL_API_SECRET; keep it private
 ```
 
-Edit `.env` and change these values:
+Change these in `.env`:
 
 ```dotenv
 APP_ENV=production
 APP_DEBUG=false
-APP_URL=https://feed.pomac.info
+APP_URL=https://socialmedia.pomac.info
 LOG_LEVEL=warning
 
-DB_DATABASE=pomacinf_feed
-DB_USERNAME=pomacinf_feed
-DB_PASSWORD=...
+DB_DATABASE=pomacinf_feed_db
+DB_USERNAME=pomacinf_pomacinf_feed
+DB_PASSWORD="..."
 
 CACHE_STORE=redis
 QUEUE_CONNECTION=redis
+REDIS_DB=2
+REDIS_CACHE_DB=3
 
-INTERNAL_API_SECRET=...       # the openssl value above
-INTERNAL_API_RATE_LIMIT=600   # all calls come from the other project's single server IP
+INTERNAL_API_SECRET=...       # the openssl value; the other project needs exactly the same value
+INTERNAL_API_RATE_LIMIT=6000  # per minute, per IP — all app traffic arrives from the other project's one IP
 ```
 
 Then:
@@ -111,38 +104,40 @@ php83 artisan migrate --force
 php83 artisan optimize
 ```
 
-## 5. Check it works
+Check: `https://socialmedia.pomac.info/up` → 200, and `https://socialmedia.pomac.info/internal/feed` → 401
+(unsigned requests are rejected — that's correct).
+
+## 5. Updating
+
+As root:
 
 ```bash
-curl -i https://feed.pomac.info/up                   # → 200
-curl -i https://feed.pomac.info/internal/feed        # → 401 (unsigned requests are rejected; that's correct)
-```
-
-## 6. Updating later
-
-```bash
-cd ~/feed-microservice
+cd /home/pomacinf/public_html/socialmedia
 git pull
-php83 /opt/cpanel/composer/bin/composer install --no-dev --optimize-autoloader
-php83 artisan migrate --force
-php83 artisan optimize
+/opt/cpanel/ea-php83/root/usr/bin/php /home/pomacinf/bin/composer install --no-dev --optimize-autoloader
+/opt/cpanel/ea-php83/root/usr/bin/php artisan migrate --force
+/opt/cpanel/ea-php83/root/usr/bin/php artisan optimize
+chown -R pomacinf:pomacinf /home/pomacinf/public_html/socialmedia
 ```
 
-## 7. Connect the other project
+The last line matters: files root creates are owned by root, and the site (which runs as `pomacinf`) then
+can't write its logs — 500 errors. Root needs, once,
+`git config --global --add safe.directory /home/pomacinf/public_html/socialmedia` to run `git pull` here.
 
-### Requirements on the other server
+After any `.env` change, run `php artisan optimize` again — the configuration is cached.
 
-- **Clocks in sync.** Signed requests are rejected if the two servers' clocks differ by more than 300 seconds.
-  Compare `date -u` on both machines.
-- **Outbound HTTPS** to `feed.pomac.info:443`.
-- **Ids are integers.** Every id sent (post, comment, like, user) is the other project's own integer id.
+## 6. Connect the other project
 
-### `.env` and `config/services.php`
+Nothing about posts lives in the other project — no Post model, no posts table. It only needs:
+
+**`.env`**
 
 ```dotenv
-FEED_SERVICE_URL=https://feed.pomac.info
+FEED_SERVICE_URL=https://socialmedia.pomac.info
 FEED_SERVICE_SECRET=...   # exactly the same as INTERNAL_API_SECRET on the feed server
 ```
+
+**`config/services.php`**, inside `return [ ... ]`:
 
 ```php
 'feed' => [
@@ -151,114 +146,47 @@ FEED_SERVICE_SECRET=...   # exactly the same as INTERNAL_API_SECRET on the feed 
 ],
 ```
 
-### Client class (`app/Services/FeedClient.php`)
+**Three files from this repository's [client/](client/) folder:**
 
-```php
-<?php
+| Copy | To | What it is |
+|---|---|---|
+| [client/FeedClient.php](client/FeedClient.php) | `app/Services/FeedClient.php` | Signs and sends every call to the microservice |
+| [client/SocialController.php](client/SocialController.php) | `app/Http/Controllers/SocialController.php` | The app-facing endpoints; adds the logged-in user's id and each author's name |
+| [client/routes.php](client/routes.php) | append to `routes/api.php` (without the `<?php` line) | `/api/social/...` routes, behind the app's login |
 
-namespace App\Services;
+Adjust two things to the other project:
+- the login middleware in `routes.php` (`auth:sanctum`) to whatever its API uses;
+- the user columns in `SocialController::withAuthors()` (`id`, `name`) — e.g. add `avatar`.
 
-use Illuminate\Http\Client\Response;
-use Illuminate\Support\Facades\Http;
+Then clear its config cache (`php artisan config:clear`, or redeploy).
 
-class FeedClient
-{
-    public function syncPost(int $id, array $payload): Response
-    {
-        return $this->send('PUT', "posts/{$id}", $payload);
-    }
+### What the app calls
 
-    public function deletePost(int $id): Response
-    {
-        return $this->send('DELETE', "posts/{$id}");
-    }
+All under the other project's `/api/social` prefix, with the app's normal login token:
 
-    public function syncComment(int $id, array $payload): Response
-    {
-        return $this->send('PUT', "comments/{$id}", $payload);
-    }
+| App call | Body / query |
+|---|---|
+| `GET feed` | `?cursor=` for the next page |
+| `GET users/{userId}/posts` | `?cursor=` |
+| `POST posts` | `content`, `type` (`text`/`image`/`video`/`multi_image`), optional `status`, `media` (`[{url}]`), `hashtags`, `reposted_from_id` |
+| `GET` / `PUT` / `DELETE posts/{id}` | `PUT`: any of `content`, `type`, `status`, `media`, `hashtags` |
+| `GET posts/{id}/comments` | `?parent_id=` for replies, `?cursor=` |
+| `POST posts/{id}/comments` | `text`, optional `parent_id` |
+| `PUT` / `DELETE comments/{id}` | `PUT`: `text` |
+| `POST` / `DELETE posts/{id}/like` | — |
+| `POST` / `DELETE comments/{id}/like` | — |
 
-    public function deleteComment(int $id): Response
-    {
-        return $this->send('DELETE', "comments/{$id}");
-    }
+Responses keep the microservice's shape (`status`, `message`, `data`, and for lists `next_cursor`), plus an
+`author` object on each post/comment, and a `liked` flag for the logged-in user.
 
-    public function syncLike(int $id, array $payload): Response
-    {
-        return $this->send('PUT', "likes/{$id}", $payload);
-    }
+### Checking the connection without SSH
 
-    public function deleteLike(int $id): Response
-    {
-        return $this->send('DELETE', "likes/{$id}");
-    }
+Call `GET /api/social/feed` on the other project with a logged-in user's token (Postman, or the app):
 
-    /**
-     * Every author's published posts, newest first. Pass the previous
-     * response's next_cursor to get the next page.
-     */
-    public function feed(int $perPage = 15, ?string $cursor = null): array
-    {
-        return $this->send('GET', 'feed', null, array_filter([
-            'per_page' => $perPage,
-            'cursor' => $cursor,
-        ]))->json();
-    }
-
-    private function send(string $method, string $path, ?array $payload = null, array $query = []): Response
-    {
-        // Signed string: METHOD\nPATH\nTIMESTAMP\nBODY. PATH has no leading slash and no query string.
-        $path = 'internal/'.$path;
-        $body = $payload === null ? '' : json_encode($payload);
-        $timestamp = (string) time();
-        $signature = hash_hmac(
-            'sha256',
-            implode("\n", [$method, $path, $timestamp, $body]),
-            config('services.feed.secret'),
-        );
-
-        $request = Http::baseUrl(config('services.feed.url'))
-            ->acceptJson()
-            ->timeout(10)
-            ->withHeaders([
-                'X-Internal-Timestamp' => $timestamp,
-                'X-Internal-Signature' => $signature,
-            ]);
-
-        if ($body !== '') {
-            // Send the exact bytes that were signed.
-            $request = $request->withBody($body, 'application/json');
-        }
-
-        return $request->send($method, $path, ['query' => $query])->throw();
-    }
-}
-```
-
-### When to call it
-
-Call `syncPost()` whenever a post is created or updated, and `deletePost()` when it is deleted. A model
-observer, ideally running in a queued job so a slow network never blocks the user, works well:
-
-```php
-app(FeedClient::class)->syncPost($post->id, [
-    'author_id' => $post->user_id,
-    'content' => $post->content,
-    'type' => 'text',                 // text | image | video | multi_image
-    'status' => 'published',          // published | draft | hidden; only published posts appear in feeds
-    'likes_count' => $post->likes_count,
-    'comments_count' => $post->comments_count,
-    'reposts_count' => 0,
-    'reposted_from_id' => null,
-    'posted_at' => $post->created_at->toIso8601String(),
-    'media' => [['url' => 'https://.../image.jpg', 'position' => 0]],  // optional, public URLs
-    'hashtags' => ['laravel'],                                         // optional, without '#'
-]);
-```
-
-To read the feed, call `app(FeedClient::class)->feed()`. Posts come back with `author_id` only, so attach the
-author's name and avatar from the other project's own `users` table before returning them to the app.
-
-**Existing data:** posts created before the integration was switched on are not in the feed yet. Backfill
-them once by looping over the existing posts and calling `syncPost()` for each. Syncing is idempotent, so
-running the backfill twice is harmless.
+| Result | Cause |
+|---|---|
+| `200` with `"data": []` | Connected — no posts yet |
+| `401` "Invalid HMAC signature" | `FEED_SERVICE_SECRET` differs from the feed server's `INTERNAL_API_SECRET`, or its config cache is stale |
+| `401` "expired" | The two servers' clocks differ by more than 5 minutes |
+| `401` "Unauthenticated." | The app's own login — not the microservice |
+| `500` / timeout | Wrong `FEED_SERVICE_URL`, or the other server can't reach `socialmedia.pomac.info` |

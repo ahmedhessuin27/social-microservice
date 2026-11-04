@@ -16,15 +16,20 @@ final readonly class FeedService implements FeedServiceInterface
         private FollowRepositoryInterface $follows,
     ) {}
 
-    public function latest(int $perPage): CursorPaginator
+    public function latest(int $perPage, ?int $viewerId = null): CursorPaginator
     {
-        return $this->posts->latestPublished($perPage);
+        return $this->posts->latestPublished($perPage, $viewerId);
     }
 
-    public function forUser(int $userId, int $perPage): CursorPaginator
+    public function forUser(int $userId, int $perPage, ?int $viewerId = null): CursorPaginator
     {
         $authorIds = [$userId, ...$this->follows->followingIds($userId)];
 
-        return $this->posts->feedForAuthors($authorIds, $perPage);
+        return $this->posts->feedForAuthors($authorIds, $perPage, $viewerId ?? $userId);
+    }
+
+    public function byAuthor(int $authorId, int $perPage, ?int $viewerId = null): CursorPaginator
+    {
+        return $this->posts->feedForAuthors([$authorId], $perPage, $viewerId);
     }
 }

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Repositories\Contracts;
 
-use App\DTOs\LikeRequestDTO;
-use App\Models\Like;
+use App\Models\Comment;
+use App\Models\Post;
 use App\Repositories\Eloquent\EloquentLikeRepository;
 use Illuminate\Container\Attributes\Bind;
 
@@ -13,10 +13,16 @@ use Illuminate\Container\Attributes\Bind;
 interface LikeRepositoryInterface
 {
     /**
-     * Insert the like if it doesn't exist, or update it if it does —
-     * makes PUT /internal/likes/{id} idempotent.
+     * Idempotent: liking twice counts once.
+     *
+     * @return int the likeable's likes_count afterwards
      */
-    public function upsert(LikeRequestDTO $data): Like;
+    public function like(Post|Comment $likeable, int $userId): int;
 
-    public function delete(int $id): bool;
+    /**
+     * Idempotent: unliking something not liked changes nothing.
+     *
+     * @return int the likeable's likes_count afterwards
+     */
+    public function unlike(Post|Comment $likeable, int $userId): int;
 }

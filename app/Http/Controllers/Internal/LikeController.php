@@ -5,14 +5,17 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Internal;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Internal\LikeRequest;
+use App\Http\Requests\Internal\ActorRequest;
+use App\Models\Comment;
+use App\Models\Post;
 use App\Repositories\Contracts\LikeRepositoryInterface;
 use Illuminate\Http\JsonResponse;
 
 /**
  * @group Likes
  *
- * Sync a consuming backend's likes (on posts or comments) into the feed microservice's own copy.
+ * Like and unlike posts and comments. Both are idempotent: liking twice
+ * counts once, and unliking something not liked changes nothing.
  */
 final class LikeController extends Controller
 {
@@ -21,42 +24,75 @@ final class LikeController extends Controller
     ) {}
 
     /**
-     * Sync a like
+     * Like a post
      *
-     * Idempotent upsert. likeable_type must be "post" or "comment", and the
-     * referenced post/comment must already be synced.
-     *
-     * @urlParam id integer required The like's id, as used by the calling backend. Example: 3001
+     * @urlParam post integer required The post's id. Example: 1001
      *
      * @header X-Internal-Timestamp required Unix timestamp used in the HMAC signature. Example: 1735689600
      * @header X-Internal-Signature required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9
      *
-     * @response 200 {"status": 200, "message": "Like synced successfully."}
-     * @response 422 scenario="Validation error" {"status": 422, "message": "The given data was invalid.", "error": {"likeable_type": ["The selected likeable type is invalid."]}}
+     * @response 200 {"status": 200, "message": "Liked successfully.", "data": {"liked": true, "likes_count": 4}}
      */
-    public function update(LikeRequest $request, int $id): JsonResponse
+    public function likePost(ActorRequest $request, Post $post): JsonResponse
     {
-        $this->likes->upsert($request->toDto($id));
+        abort_unless($post->isVisibleTo($request->userId()), 404);
 
-        return response()->api(__('sync.like_synced'), 200);
+        return $this->respond(true, $this->likes->like($post, $request->userId()));
     }
 
     /**
-     * Delete a like
+     * Unlike a post
      *
-     * Idempotent: returns 200 whether or not the like existed locally.
-     *
-     * @urlParam id integer required The like's id, as used by the calling backend. Example: 3001
+     * @urlParam post integer required The post's id. Example: 1001
      *
      * @header X-Internal-Timestamp required Unix timestamp used in the HMAC signature. Example: 1735689600
      * @header X-Internal-Signature required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9
      *
-     * @response 200 {"status": 200, "message": "Like deleted successfully."}
+     * @response 200 {"status": 200, "message": "Like removed successfully.", "data": {"liked": false, "likes_count": 3}}
      */
-    public function destroy(int $id): JsonResponse
+    public function unlikePost(ActorRequest $request, Post $post): JsonResponse
     {
-        $this->likes->delete($id);
+        return $this->respond(false, $this->likes->unlike($post, $request->userId()));
+    }
 
-        return response()->api(__('sync.like_deleted'), 200);
+    /**
+     * Like a comment
+     *
+     * @urlParam comment integer required The comment's id. Example: 2001
+     *
+     * @header X-Internal-Timestamp required Unix timestamp used in the HMAC signature. Example: 1735689600
+     * @header X-Internal-Signature required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9
+     *
+     * @response 200 {"status": 200, "message": "Liked successfully.", "data": {"liked": true, "likes_count": 1}}
+     */
+    public function likeComment(ActorRequest $request, Comment $comment): JsonResponse
+    {
+        abort_unless($comment->post?->isVisibleTo($request->userId()), 404);
+
+        return $this->respond(true, $this->likes->like($comment, $request->userId()));
+    }
+
+    /**
+     * Unlike a comment
+     *
+     * @urlParam comment integer required The comment's id. Example: 2001
+     *
+     * @header X-Internal-Timestamp required Unix timestamp used in the HMAC signature. Example: 1735689600
+     * @header X-Internal-Signature required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9
+     *
+     * @response 200 {"status": 200, "message": "Like removed successfully.", "data": {"liked": false, "likes_count": 0}}
+     */
+    public function unlikeComment(ActorRequest $request, Comment $comment): JsonResponse
+    {
+        return $this->respond(false, $this->likes->unlike($comment, $request->userId()));
+    }
+
+    private function respond(bool $liked, int $likesCount): JsonResponse
+    {
+        return response()->api(
+            __($liked ? 'social.liked' : 'social.unliked'),
+            200,
+            ['liked' => $liked, 'likes_count' => $likesCount],
+        );
     }
 }

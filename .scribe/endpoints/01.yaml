@@ -1,25 +1,25 @@
 name: Comments
 description: |-
 
-  Sync a consuming backend's post comments into the feed microservice's own copy.
+  Comments on posts, and replies to comments (one level deep).
 endpoints:
   -
     custom: []
     httpMethods:
-      - PUT
-    uri: 'internal/comments/{id}'
+      - GET
+    uri: 'internal/posts/{post_id}/comments'
     metadata:
       custom: []
       groupName: Comments
       groupDescription: |-
 
-        Sync a consuming backend's post comments into the feed microservice's own copy.
+        Comments on posts, and replies to comments (one level deep).
       subgroup: ''
       subgroupDescription: ''
-      title: 'Sync a comment'
+      title: "List a post's comments"
       description: |-
-        Idempotent upsert. The parent post must already be synced — if it
-        isn't yet, this fails on the foreign key and should be retried.
+        Top-level comments, oldest first, cursor-paginated. Pass parent_id to
+        list the replies to one comment instead.
       authenticated: false
       deprecated: false
     headers:
@@ -28,33 +28,128 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      id:
+      post_id:
         custom: []
-        name: id
-        description: "The comment's id, as used by the calling backend."
+        name: post_id
+        description: 'The ID of the post.'
         required: true
-        example: 2001
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      post:
+        custom: []
+        name: post
+        description: "The post's id."
+        required: true
+        example: 1001
         type: integer
         enumValues: []
         exampleWasSpecified: true
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      id: 2001
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      post_id:
+      post_id: 16
+      post: 1001
+    queryParameters:
+      viewer_id:
         custom: []
-        name: post_id
-        description: 'The id of the post this comment belongs to. Must already be synced. Must be at least 1.'
-        required: true
-        example: 1001
+        name: viewer_id
+        description: 'The id of the user viewing, as used by the calling backend. Adds a "liked" flag to each item. Must be at least 1.'
+        required: false
+        example: 42
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
+      per_page:
+        custom: []
+        name: per_page
+        description: 'Number of items per page (1-50). Defaults to 15. Must be at least 1. Must not be greater than 50.'
+        required: false
+        example: 15
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      parent_id:
+        custom: []
+        name: parent_id
+        description: "List the replies to this comment instead of the post's top-level comments. Must be at least 1."
+        required: false
+        example: null
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      viewer_id: 42
+      per_page: 15
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'internal/posts/{post_id}/comments'
+    metadata:
+      custom: []
+      groupName: Comments
+      groupDescription: |-
+
+        Comments on posts, and replies to comments (one level deep).
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Add a comment'
+      description: ''
+      authenticated: false
+      deprecated: false
+    headers:
+      X-Internal-Timestamp: 'required Unix timestamp used in the HMAC signature. Example: 1735689600'
+      X-Internal-Signature: 'required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      post_id:
+        custom: []
+        name: post_id
+        description: 'The ID of the post.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      post:
+        custom: []
+        name: post
+        description: "The post's id."
+        required: true
+        example: 1001
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      post_id: 16
+      post: 1001
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
       author_id:
         custom: []
         name: author_id
@@ -80,7 +175,7 @@ endpoints:
       parent_id:
         custom: []
         name: parent_id
-        description: "If this is a reply, the parent comment's id. Must be at least 1."
+        description: 'To reply to a comment, its id. Must be a top-level comment on the same post.'
         required: false
         example: null
         type: integer
@@ -88,48 +183,94 @@ endpoints:
         exampleWasSpecified: false
         nullable: true
         deprecated: false
-      likes_count:
+    cleanBodyParameters:
+      author_id: 42
+      text: 'Nice post!'
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: 'internal/comments/{comment_id}'
+    metadata:
+      custom: []
+      groupName: Comments
+      groupDescription: |-
+
+        Comments on posts, and replies to comments (one level deep).
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Edit a comment'
+      description: "Only the comment's author can edit it."
+      authenticated: false
+      deprecated: false
+    headers:
+      X-Internal-Timestamp: 'required Unix timestamp used in the HMAC signature. Example: 1735689600'
+      X-Internal-Signature: 'required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      comment_id:
         custom: []
-        name: likes_count
-        description: 'Current like count, as tracked by the calling backend. Must be at least 0.'
+        name: comment_id
+        description: 'The ID of the comment.'
         required: true
-        example: 0
+        example: 16
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      replies_count:
+      comment:
         custom: []
-        name: replies_count
-        description: 'Current reply count, as tracked by the calling backend. Must be at least 0.'
+        name: comment
+        description: "The comment's id."
         required: true
-        example: 0
+        example: 2001
         type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      comment_id: 16
+      comment: 2001
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      user_id:
+        custom: []
+        name: user_id
+        description: "The id of the user editing — must be the comment's author. Must be at least 1."
+        required: true
+        example: 42
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      text:
+        custom: []
+        name: text
+        description: 'The new comment text.'
+        required: true
+        example: 'Nice post (edited)'
+        type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      post_id: 1001
-      author_id: 42
-      text: 'Nice post!'
-      likes_count: 0
-      replies_count: 0
+      user_id: 42
+      text: 'Nice post (edited)'
     fileParameters: []
-    responses:
-      -
-        custom: []
-        status: 200
-        content: '{"status": 200, "message": "Comment synced successfully."}'
-        headers: []
-        description: ''
-      -
-        custom: []
-        status: 422
-        content: '{"status": 422, "message": "The given data was invalid.", "error": {"post_id": ["The post id field is required."]}}'
-        headers: []
-        description: 'Validation error'
+    responses: []
     responseFields: []
     auth: []
     controller: null
@@ -139,17 +280,19 @@ endpoints:
     custom: []
     httpMethods:
       - DELETE
-    uri: 'internal/comments/{id}'
+    uri: 'internal/comments/{comment_id}'
     metadata:
       custom: []
       groupName: Comments
       groupDescription: |-
 
-        Sync a consuming backend's post comments into the feed microservice's own copy.
+        Comments on posts, and replies to comments (one level deep).
       subgroup: ''
       subgroupDescription: ''
       title: 'Delete a comment'
-      description: 'Idempotent: returns 200 whether or not the comment existed locally.'
+      description: |-
+        The comment's author or the post's author can delete it. Its replies
+        are deleted with it.
       authenticated: false
       deprecated: false
     headers:
@@ -158,10 +301,21 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      id:
+      comment_id:
         custom: []
-        name: id
-        description: "The comment's id, as used by the calling backend."
+        name: comment_id
+        description: 'The ID of the comment.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      comment:
+        custom: []
+        name: comment
+        description: "The comment's id."
         required: true
         example: 2001
         type: integer
@@ -170,19 +324,26 @@ endpoints:
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      id: 2001
+      comment_id: 16
+      comment: 2001
     queryParameters: []
     cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses:
-      -
+    bodyParameters:
+      user_id:
         custom: []
-        status: 200
-        content: '{"status": 200, "message": "Comment deleted successfully."}'
-        headers: []
-        description: ''
+        name: user_id
+        description: 'The id of the user performing the action, as used by the calling backend. Must be at least 1.'
+        required: true
+        example: 42
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      user_id: 42
+    fileParameters: []
+    responses: []
     responseFields: []
     auth: []
     controller: null

@@ -14,9 +14,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('likes', function (Blueprint $table): void {
-            // Primary key mirrors the source system's like id, making
-            // PUT /internal/likes/{id} a natural idempotent upsert.
-            $table->unsignedBigInteger('id')->primary();
+            $table->id();
 
             $table->unsignedBigInteger('user_id');
 
@@ -27,6 +25,7 @@ return new class extends Migration
 
             $table->timestamps();
 
+            // One like per user per post/comment; also makes liking idempotent.
             $table->unique(['user_id', 'likeable_id', 'likeable_type']);
         });
     }

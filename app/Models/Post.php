@@ -17,13 +17,7 @@ class Post extends Model
 {
     use SoftDeletes;
 
-    // Primary key mirrors the consuming application's own integer id.
-    public $incrementing = false;
-
-    protected $keyType = 'int';
-
     protected $fillable = [
-        'id',
         'author_id',
         'content',
         'type',
@@ -38,6 +32,8 @@ class Post extends Model
     protected function casts(): array
     {
         return [
+            'author_id' => 'integer',
+            'reposted_from_id' => 'integer',
             'type' => PostType::class,
             'status' => PostStatus::class,
             'likes_count' => 'integer',
@@ -45,6 +41,15 @@ class Post extends Model
             'reposts_count' => 'integer',
             'posted_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Published posts are visible to everyone; drafts and hidden posts only
+     * to their author.
+     */
+    public function isVisibleTo(?int $userId): bool
+    {
+        return $this->status === PostStatus::Published || $this->author_id === $userId;
     }
 
     public function media(): HasMany

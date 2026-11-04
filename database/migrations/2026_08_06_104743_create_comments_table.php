@@ -14,12 +14,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('comments', function (Blueprint $table): void {
-            // Primary key mirrors the source system's comment id, making
-            // PUT /internal/comments/{id} a natural idempotent upsert.
-            $table->unsignedBigInteger('id')->primary();
-
-            // If a comment's sync arrives before its post's, this FK causes the
-            // job to fail and retry via the queue's backoff until the post exists.
+            $table->id();
             $table->foreignId('post_id')->constrained('posts')->cascadeOnDelete();
 
             $table->unsignedBigInteger('author_id');

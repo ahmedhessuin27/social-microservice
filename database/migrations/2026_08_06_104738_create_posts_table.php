@@ -14,9 +14,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('posts', function (Blueprint $table): void {
-            // Primary key mirrors the id assigned by the consuming application,
-            // making PUT /internal/posts/{id} a natural idempotent upsert.
-            $table->unsignedBigInteger('id')->primary();
+            // This service is the source of truth for posts, so it assigns the ids.
+            $table->id();
 
             // Identifies the author in the consuming application. No local
             // foreign key: this microservice never touches another app's users table.
@@ -26,16 +25,15 @@ return new class extends Migration
             $table->string('type')->default('text');
             $table->string('status')->default('published');
 
-            // Denormalized counters, trusted as sent by the consumer on each
-            // sync — avoids this service having to recompute them locally.
+            // Denormalized counters, kept up to date as likes/comments/reposts
+            // are added and removed, so feeds never have to count rows.
             $table->unsignedInteger('likes_count')->default(0);
             $table->unsignedInteger('comments_count')->default(0);
             $table->unsignedInteger('reposts_count')->default(0);
 
             $table->foreignId('reposted_from_id')->nullable()->constrained('posts')->nullOnDelete();
 
-            // Original creation time in the source system, used for feed
-            // ordering so late-arriving syncs don't jump to the top of the feed.
+            // Publication time, used for feed ordering.
             $table->timestamp('posted_at')->index();
 
             $table->softDeletes();

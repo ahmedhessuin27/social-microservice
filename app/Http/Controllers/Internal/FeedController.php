@@ -31,8 +31,6 @@ final class FeedController extends Controller
      * Use this when the calling backend has no follow/following system.
      * Draft/hidden posts are excluded.
      *
-     * @queryParam per_page integer Number of posts per page (1-50). Defaults to 15. Example: 15
-     *
      * @header X-Internal-Timestamp required Unix timestamp used in the HMAC signature. Example: 1735689600
      * @header X-Internal-Signature required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9
      *
@@ -68,7 +66,7 @@ final class FeedController extends Controller
      */
     public function latest(FeedRequest $request): JsonResponse
     {
-        $posts = $this->feed->latest($request->perPage());
+        $posts = $this->feed->latest($request->perPage(), $request->viewerId());
 
         return response()->api(
             __('feed.retrieved'),
@@ -84,8 +82,6 @@ final class FeedController extends Controller
      * first, cursor-paginated. Draft/hidden posts are excluded.
      *
      * @urlParam userId integer required The id of the user whose feed to build, as used by the calling backend. Example: 42
-     *
-     * @queryParam per_page integer Number of posts per page (1-50). Defaults to 15. Example: 15
      *
      * @header X-Internal-Timestamp required Unix timestamp used in the HMAC signature. Example: 1735689600
      * @header X-Internal-Signature required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9
@@ -122,10 +118,32 @@ final class FeedController extends Controller
      */
     public function index(FeedRequest $request, int $userId): JsonResponse
     {
-        $posts = $this->feed->forUser($userId, $request->perPage());
+        $posts = $this->feed->forUser($userId, $request->perPage(), $request->viewerId());
 
         return response()->api(
             __('feed.retrieved'),
+            200,
+            BaseResource::make(PostResource::collection($posts)),
+        );
+    }
+
+    /**
+     * Get a user's posts
+     *
+     * One user's published posts, newest first, cursor-paginated — e.g. for
+     * a profile page.
+     *
+     * @urlParam userId integer required The author's id, as used by the calling backend. Example: 42
+     *
+     * @header X-Internal-Timestamp required Unix timestamp used in the HMAC signature. Example: 1735689600
+     * @header X-Internal-Signature required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9
+     */
+    public function byAuthor(FeedRequest $request, int $userId): JsonResponse
+    {
+        $posts = $this->feed->byAuthor($userId, $request->perPage(), $request->viewerId());
+
+        return response()->api(
+            __('social.posts_retrieved'),
             200,
             BaseResource::make(PostResource::collection($posts)),
         );

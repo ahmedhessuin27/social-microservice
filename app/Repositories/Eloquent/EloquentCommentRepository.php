@@ -6,35 +6,67 @@ namespace App\Repositories\Eloquent;
 
 use App\DTOs\CommentRequestDTO;
 use App\Models\Comment;
+use App\Models\Post;
 use App\Repositories\Contracts\CommentRepositoryInterface;
+use App\Repositories\Eloquent\Concerns\AdjustsCounters;
+use Illuminate\Contracts\Pagination\CursorPaginator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class EloquentCommentRepository implements CommentRepositoryInterface
 {
-    public function upsert(CommentRequestDTO $data): Comment
+    use AdjustsCounters;
+
+    public function create(Post $post, CommentRequestDTO $data): Comment
     {
-        // withTrashed: a re-sync of a previously deleted id must revive
-        // that row, not insert a second one under the same primary key.
-        $comment = Comment::withTrashed()->updateOrCreate(
-            ['id' => $data->id],
-            [
-                'post_id' => $data->postId,
+        return DB::transaction(function () use ($post, $data): Comment {
+            $comment = $post->comments()->create([
                 'author_id' => $data->authorId,
                 'text' => $data->text,
                 'parent_id' => $data->parentId,
-                'likes_count' => $data->likesCount,
-                'replies_count' => $data->repliesCount,
-            ],
-        );
+            ]);
 
-        if ($comment->trashed()) {
-            $comment->restore();
-        }
+            // comments_count counts replies too: it's the post's total.
+            $this->adjustCounter($post, 'comments_count', 1);
+
+            if ($comment->parent !== null) {
+                $this->adjustCounter($comment->parent, 'replies_count', 1);
+            }
+
+            return $comment->refresh();
+        });
+    }
+
+    public function update(Comment $comment, string $text): Comment
+    {
+        $comment->update(['text' => $text]);
 
         return $comment;
     }
 
-    public function delete(int $id): bool
+    public function delete(Comment $comment): void
     {
-        return Comment::whereKey($id)->delete() > 0;
+        DB::transaction(function () use ($comment): void {
+            $deletedReplies = $comment->replies()->delete();
+            $comment->delete();
+
+            $this->adjustCounter($comment->post, 'comments_count', -(1 + $deletedReplies));
+
+            if ($comment->parent !== null) {
+                $this->adjustCounter($comment->parent, 'replies_count', -1);
+            }
+        });
+    }
+
+    public function forPost(Post $post, ?int $parentId, int $perPage, ?int $viewerId = null): CursorPaginator
+    {
+        return $post->comments()
+            ->where('parent_id', $parentId)
+            ->when($viewerId !== null, fn (Builder $query) => $query->withExists([
+                'likes as liked' => fn (Builder $likes) => $likes->where('user_id', $viewerId),
+            ]))
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->cursorPaginate($perPage);
     }
 }

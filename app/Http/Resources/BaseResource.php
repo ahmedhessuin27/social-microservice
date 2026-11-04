@@ -47,7 +47,9 @@ class BaseResource extends JsonResource
         }
 
         if ($this->resource instanceof JsonResource) {
-            return $this->resource->toArray($request);
+            // resolve(), not toArray(): it drops the placeholders left by
+            // when()/whenLoaded() for absent values.
+            return $this->resource->resolve($request);
         }
 
         // Default case

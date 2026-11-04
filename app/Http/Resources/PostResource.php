@@ -24,7 +24,10 @@ class PostResource extends JsonResource
             'comments_count' => $this->comments_count,
             'reposts_count' => $this->reposts_count,
             'reposted_from_id' => $this->reposted_from_id,
+            // Only present when the request named a viewer_id.
+            'liked' => $this->when(array_key_exists('liked', $this->resource->getAttributes()), fn (): bool => (bool) $this->liked),
             'posted_at' => $this->posted_at,
+            'updated_at' => $this->updated_at,
             'media' => $this->whenLoaded('media', fn () => $this->media->map(fn ($item) => [
                 'url' => $item->url,
                 'position' => $item->position,

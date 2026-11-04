@@ -1,25 +1,25 @@
 name: Likes
 description: |-
 
-  Sync a consuming backend's likes (on posts or comments) into the feed microservice's own copy.
+  Like and unlike posts and comments. Both are idempotent: liking twice
+  counts once, and unliking something not liked changes nothing.
 endpoints:
   -
     custom: []
     httpMethods:
       - PUT
-    uri: 'internal/likes/{id}'
+    uri: 'internal/posts/{post_id}/likes'
     metadata:
       custom: []
       groupName: Likes
       groupDescription: |-
 
-        Sync a consuming backend's likes (on posts or comments) into the feed microservice's own copy.
+        Like and unlike posts and comments. Both are idempotent: liking twice
+        counts once, and unliking something not liked changes nothing.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Sync a like'
-      description: |-
-        Idempotent upsert. likeable_type must be "post" or "comment", and the
-        referenced post/comment must already be synced.
+      title: 'Like a post'
+      description: ''
       authenticated: false
       deprecated: false
     headers:
@@ -28,26 +28,38 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      id:
+      post_id:
         custom: []
-        name: id
-        description: "The like's id, as used by the calling backend."
+        name: post_id
+        description: 'The ID of the post.'
         required: true
-        example: 3001
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      post:
+        custom: []
+        name: post
+        description: "The post's id."
+        required: true
+        example: 1001
         type: integer
         enumValues: []
         exampleWasSpecified: true
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      id: 3001
+      post_id: 16
+      post: 1001
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
       user_id:
         custom: []
         name: user_id
-        description: "The liking user's id, as used by the calling backend. Must be at least 1."
+        description: 'The id of the user performing the action, as used by the calling backend. Must be at least 1.'
         required: true
         example: 42
         type: integer
@@ -55,48 +67,16 @@ endpoints:
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      likeable_id:
-        custom: []
-        name: likeable_id
-        description: 'The id of the post or comment being liked. Must already be synced. Must be at least 1.'
-        required: true
-        example: 1001
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      likeable_type:
-        custom: []
-        name: likeable_type
-        description: 'Either "post" or "comment".'
-        required: true
-        example: post
-        type: string
-        enumValues:
-          - post
-          - comment
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
     cleanBodyParameters:
       user_id: 42
-      likeable_id: 1001
-      likeable_type: post
     fileParameters: []
     responses:
       -
         custom: []
         status: 200
-        content: '{"status": 200, "message": "Like synced successfully."}'
+        content: '{"status": 200, "message": "Liked successfully.", "data": {"liked": true, "likes_count": 4}}'
         headers: []
         description: ''
-      -
-        custom: []
-        status: 422
-        content: '{"status": 422, "message": "The given data was invalid.", "error": {"likeable_type": ["The selected likeable type is invalid."]}}'
-        headers: []
-        description: 'Validation error'
     responseFields: []
     auth: []
     controller: null
@@ -106,17 +86,18 @@ endpoints:
     custom: []
     httpMethods:
       - DELETE
-    uri: 'internal/likes/{id}'
+    uri: 'internal/posts/{post_id}/likes'
     metadata:
       custom: []
       groupName: Likes
       groupDescription: |-
 
-        Sync a consuming backend's likes (on posts or comments) into the feed microservice's own copy.
+        Like and unlike posts and comments. Both are idempotent: liking twice
+        counts once, and unliking something not liked changes nothing.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Delete a like'
-      description: 'Idempotent: returns 200 whether or not the like existed locally.'
+      title: 'Unlike a post'
+      description: ''
       authenticated: false
       deprecated: false
     headers:
@@ -125,29 +106,209 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      id:
+      post_id:
         custom: []
-        name: id
-        description: "The like's id, as used by the calling backend."
+        name: post_id
+        description: 'The ID of the post.'
         required: true
-        example: 3001
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      post:
+        custom: []
+        name: post
+        description: "The post's id."
+        required: true
+        example: 1001
         type: integer
         enumValues: []
         exampleWasSpecified: true
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      id: 3001
+      post_id: 16
+      post: 1001
     queryParameters: []
     cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
+    bodyParameters:
+      user_id:
+        custom: []
+        name: user_id
+        description: 'The id of the user performing the action, as used by the calling backend. Must be at least 1.'
+        required: true
+        example: 42
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      user_id: 42
     fileParameters: []
     responses:
       -
         custom: []
         status: 200
-        content: '{"status": 200, "message": "Like deleted successfully."}'
+        content: '{"status": 200, "message": "Like removed successfully.", "data": {"liked": false, "likes_count": 3}}'
+        headers: []
+        description: ''
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: 'internal/comments/{comment_id}/likes'
+    metadata:
+      custom: []
+      groupName: Likes
+      groupDescription: |-
+
+        Like and unlike posts and comments. Both are idempotent: liking twice
+        counts once, and unliking something not liked changes nothing.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Like a comment'
+      description: ''
+      authenticated: false
+      deprecated: false
+    headers:
+      X-Internal-Timestamp: 'required Unix timestamp used in the HMAC signature. Example: 1735689600'
+      X-Internal-Signature: 'required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      comment_id:
+        custom: []
+        name: comment_id
+        description: 'The ID of the comment.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      comment:
+        custom: []
+        name: comment
+        description: "The comment's id."
+        required: true
+        example: 2001
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      comment_id: 16
+      comment: 2001
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      user_id:
+        custom: []
+        name: user_id
+        description: 'The id of the user performing the action, as used by the calling backend. Must be at least 1.'
+        required: true
+        example: 42
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      user_id: 42
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"status": 200, "message": "Liked successfully.", "data": {"liked": true, "likes_count": 1}}'
+        headers: []
+        description: ''
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'internal/comments/{comment_id}/likes'
+    metadata:
+      custom: []
+      groupName: Likes
+      groupDescription: |-
+
+        Like and unlike posts and comments. Both are idempotent: liking twice
+        counts once, and unliking something not liked changes nothing.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Unlike a comment'
+      description: ''
+      authenticated: false
+      deprecated: false
+    headers:
+      X-Internal-Timestamp: 'required Unix timestamp used in the HMAC signature. Example: 1735689600'
+      X-Internal-Signature: 'required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      comment_id:
+        custom: []
+        name: comment_id
+        description: 'The ID of the comment.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      comment:
+        custom: []
+        name: comment
+        description: "The comment's id."
+        required: true
+        example: 2001
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      comment_id: 16
+      comment: 2001
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      user_id:
+        custom: []
+        name: user_id
+        description: 'The id of the user performing the action, as used by the calling backend. Must be at least 1.'
+        required: true
+        example: 42
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      user_id: 42
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"status": 200, "message": "Like removed successfully.", "data": {"liked": false, "likes_count": 0}}'
         headers: []
         description: ''
     responseFields: []
