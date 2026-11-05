@@ -126,6 +126,10 @@ id taken from the app's request — and this service enforces ownership with `40
 | `PUT` / `DELETE /internal/comments/{id}/likes` | Like / unlike a comment. |
 | `PUT` / `DELETE /internal/follows` | Follow / unfollow, keyed by `(follower_id, following_id)` in the body. |
 
+Every response has the same envelope: `status` (`true` for success, `false` for any error), `message`, and
+`data` or — for validation errors — `error`. The numeric code (201, 403, 422…) is the HTTP status code of the
+response itself.
+
 Lists are cursor-paginated (`per_page` 1–50, default 15): pass the response's `next_cursor` as `?cursor=` for
 the next page. Posts and comments carry only `author_id` — your app attaches names/avatars from its own users
 table (the controller in [client/](client/) does this). Media is sent as public URLs: upload files in your

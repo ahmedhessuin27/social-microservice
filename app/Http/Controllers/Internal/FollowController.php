@@ -30,8 +30,8 @@ final class FollowController extends Controller
      * @header X-Internal-Timestamp required Unix timestamp used in the HMAC signature. Example: 1735689600
      * @header X-Internal-Signature required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9
      *
-     * @response 200 {"status": 200, "message": "Follow relationship synced successfully."}
-     * @response 422 scenario="Validation error" {"status": 422, "message": "The given data was invalid.", "error": {"following_id": ["The following id and follower id must be different."]}}
+     * @response 200 {"status": true, "message": "Follow relationship synced successfully."}
+     * @response 422 scenario="Validation error" {"status": false, "message": "The given data was invalid.", "error": {"following_id": ["The following id and follower id must be different."]}}
      */
     public function update(FollowRequest $request): JsonResponse
     {
@@ -48,7 +48,7 @@ final class FollowController extends Controller
      * @header X-Internal-Timestamp required Unix timestamp used in the HMAC signature. Example: 1735689600
      * @header X-Internal-Signature required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9
      *
-     * @response 200 {"status": 200, "message": "Follow relationship deleted successfully."}
+     * @response 200 {"status": true, "message": "Follow relationship deleted successfully."}
      */
     public function destroy(FollowRequest $request): JsonResponse
     {

@@ -35,7 +35,7 @@ final class FeedController extends Controller
      * @header X-Internal-Signature required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9
      *
      * @response 200 {
-     *   "status": 200,
+     *   "status": true,
      *   "message": "Feed retrieved successfully.",
      *   "data": [
      *     {
@@ -87,7 +87,7 @@ final class FeedController extends Controller
      * @header X-Internal-Signature required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9
      *
      * @response 200 {
-     *   "status": 200,
+     *   "status": true,
      *   "message": "Feed retrieved successfully.",
      *   "data": [
      *     {

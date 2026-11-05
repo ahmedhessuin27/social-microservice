@@ -64,13 +64,13 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"status": 200, "message": "Follow relationship synced successfully."}'
+        content: '{"status": true, "message": "Follow relationship synced successfully."}'
         headers: []
         description: ''
       -
         custom: []
         status: 422
-        content: '{"status": 422, "message": "The given data was invalid.", "error": {"following_id": ["The following id and follower id must be different."]}}'
+        content: '{"status": false, "message": "The given data was invalid.", "error": {"following_id": ["The following id and follower id must be different."]}}'
         headers: []
         description: 'Validation error'
     responseFields: []
@@ -137,7 +137,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"status": 200, "message": "Follow relationship deleted successfully."}'
+        content: '{"status": true, "message": "Follow relationship deleted successfully."}'
         headers: []
         description: ''
     responseFields: []

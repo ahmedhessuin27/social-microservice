@@ -31,7 +31,7 @@ final class LikeController extends Controller
      * @header X-Internal-Timestamp required Unix timestamp used in the HMAC signature. Example: 1735689600
      * @header X-Internal-Signature required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9
      *
-     * @response 200 {"status": 200, "message": "Liked successfully.", "data": {"liked": true, "likes_count": 4}}
+     * @response 200 {"status": true, "message": "Liked successfully.", "data": {"liked": true, "likes_count": 4}}
      */
     public function likePost(ActorRequest $request, Post $post): JsonResponse
     {
@@ -48,7 +48,7 @@ final class LikeController extends Controller
      * @header X-Internal-Timestamp required Unix timestamp used in the HMAC signature. Example: 1735689600
      * @header X-Internal-Signature required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9
      *
-     * @response 200 {"status": 200, "message": "Like removed successfully.", "data": {"liked": false, "likes_count": 3}}
+     * @response 200 {"status": true, "message": "Like removed successfully.", "data": {"liked": false, "likes_count": 3}}
      */
     public function unlikePost(ActorRequest $request, Post $post): JsonResponse
     {
@@ -63,7 +63,7 @@ final class LikeController extends Controller
      * @header X-Internal-Timestamp required Unix timestamp used in the HMAC signature. Example: 1735689600
      * @header X-Internal-Signature required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9
      *
-     * @response 200 {"status": 200, "message": "Liked successfully.", "data": {"liked": true, "likes_count": 1}}
+     * @response 200 {"status": true, "message": "Liked successfully.", "data": {"liked": true, "likes_count": 1}}
      */
     public function likeComment(ActorRequest $request, Comment $comment): JsonResponse
     {
@@ -80,7 +80,7 @@ final class LikeController extends Controller
      * @header X-Internal-Timestamp required Unix timestamp used in the HMAC signature. Example: 1735689600
      * @header X-Internal-Signature required HMAC-SHA256 signature — see the Authentication section. Example: 5e1a3f...c9
      *
-     * @response 200 {"status": 200, "message": "Like removed successfully.", "data": {"liked": false, "likes_count": 0}}
+     * @response 200 {"status": true, "message": "Like removed successfully.", "data": {"liked": false, "likes_count": 0}}
      */
     public function unlikeComment(ActorRequest $request, Comment $comment): JsonResponse
     {

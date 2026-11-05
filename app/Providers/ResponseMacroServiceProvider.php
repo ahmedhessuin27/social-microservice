@@ -22,7 +22,8 @@ class ResponseMacroServiceProvider extends ServiceProvider
             $errors = null
         ) {
             $response = [
-                'status' => $statusCode,
+                // true for any 2xx; the numeric code stays on the HTTP response itself.
+                'status' => $statusCode >= 200 && $statusCode < 300,
                 'message' => $message,
             ];
 

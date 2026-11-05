@@ -31,7 +31,7 @@ final class ExceptionRenderingTest extends TestCase
 
         $response->assertStatus(404);
         $response->assertJson([
-            'status' => 404,
+            'status' => false,
             'message' => 'The requested resource was not found.',
         ]);
     }
@@ -44,7 +44,7 @@ final class ExceptionRenderingTest extends TestCase
             ->postJson('/internal/posts', json_decode($body, true));
 
         $response->assertStatus(422);
-        $response->assertJsonPath('status', 422);
+        $response->assertJsonPath('status', false);
         $response->assertJsonPath('message', 'The given data was invalid.');
         $response->assertJsonStructure(['error' => ['author_id', 'type']]);
     }
@@ -74,7 +74,7 @@ final class ExceptionRenderingTest extends TestCase
 
         $response->assertStatus(500);
         $response->assertJson([
-            'status' => 500,
+            'status' => false,
             'message' => 'An unexpected error occurred. Please try again later.',
         ]);
         $this->assertStringNotContainsString('SQLSTATE', $response->getContent());

@@ -74,7 +74,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"status": 200, "message": "Liked successfully.", "data": {"liked": true, "likes_count": 4}}'
+        content: '{"status": true, "message": "Liked successfully.", "data": {"liked": true, "likes_count": 4}}'
         headers: []
         description: ''
     responseFields: []
@@ -152,7 +152,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"status": 200, "message": "Like removed successfully.", "data": {"liked": false, "likes_count": 3}}'
+        content: '{"status": true, "message": "Like removed successfully.", "data": {"liked": false, "likes_count": 3}}'
         headers: []
         description: ''
     responseFields: []
@@ -230,7 +230,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"status": 200, "message": "Liked successfully.", "data": {"liked": true, "likes_count": 1}}'
+        content: '{"status": true, "message": "Liked successfully.", "data": {"liked": true, "likes_count": 1}}'
         headers: []
         description: ''
     responseFields: []
@@ -308,7 +308,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"status": 200, "message": "Like removed successfully.", "data": {"liked": false, "likes_count": 0}}'
+        content: '{"status": true, "message": "Like removed successfully.", "data": {"liked": false, "likes_count": 0}}'
         headers: []
         description: ''
     responseFields: []

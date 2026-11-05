@@ -39,7 +39,7 @@ final class RateLimitTest extends TestCase
 
         $response->assertStatus(429);
         $response->assertJson([
-            'status' => 429,
+            'status' => false,
             'message' => 'Too many requests. Please slow down.',
         ]);
     }

@@ -53,6 +53,7 @@ final class SocialApiTest extends TestCase
         ]);
 
         $response->assertStatus(201)
+            ->assertJsonPath('status', true)
             ->assertJsonPath('data.author_id', 7)
             ->assertJsonPath('data.status', 'published')
             ->assertJsonPath('data.likes_count', 0)
@@ -82,7 +83,9 @@ final class SocialApiTest extends TestCase
     {
         $id = $this->createPost(['hashtags' => ['keep']]);
 
-        $this->api('PUT', "/internal/posts/{$id}", ['user_id' => 2, 'content' => 'hacked'])->assertStatus(403);
+        $this->api('PUT', "/internal/posts/{$id}", ['user_id' => 2, 'content' => 'hacked'])
+            ->assertStatus(403)
+            ->assertJsonPath('status', false);
 
         $this->api('PUT', "/internal/posts/{$id}", ['user_id' => 1, 'content' => 'edited'])
             ->assertStatus(200)

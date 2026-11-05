@@ -161,7 +161,7 @@
     </ul>
 
     <ul class="toc-footer" id="last-updated">
-        <li>Last updated: November 4, 2026</li>
+        <li>Last updated: November 5, 2026</li>
     </ul>
 </div>
 
@@ -1077,7 +1077,7 @@ fetch(url, {
                 <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;status&quot;: 200,
+    &quot;status&quot;: true,
     &quot;message&quot;: &quot;Feed retrieved successfully.&quot;,
     &quot;data&quot;: [
         {
@@ -1286,7 +1286,7 @@ fetch(url, {
                 <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;status&quot;: 200,
+    &quot;status&quot;: true,
     &quot;message&quot;: &quot;Feed retrieved successfully.&quot;,
     &quot;data&quot;: [
         {
@@ -1701,7 +1701,7 @@ fetch(url, {
                 <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;status&quot;: 200,
+    &quot;status&quot;: true,
     &quot;message&quot;: &quot;Follow relationship synced successfully.&quot;
 }</code>
  </pre>
@@ -1711,7 +1711,7 @@ fetch(url, {
                 <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;status&quot;: 422,
+    &quot;status&quot;: false,
     &quot;message&quot;: &quot;The given data was invalid.&quot;,
     &quot;error&quot;: {
         &quot;following_id&quot;: [
@@ -1900,7 +1900,7 @@ fetch(url, {
                 <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;status&quot;: 200,
+    &quot;status&quot;: true,
     &quot;message&quot;: &quot;Follow relationship deleted successfully.&quot;
 }</code>
  </pre>
@@ -2087,7 +2087,7 @@ fetch(url, {
                 <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;status&quot;: 200,
+    &quot;status&quot;: true,
     &quot;message&quot;: &quot;Liked successfully.&quot;,
     &quot;data&quot;: {
         &quot;liked&quot;: true,
@@ -2286,7 +2286,7 @@ fetch(url, {
                 <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;status&quot;: 200,
+    &quot;status&quot;: true,
     &quot;message&quot;: &quot;Like removed successfully.&quot;,
     &quot;data&quot;: {
         &quot;liked&quot;: false,
@@ -2485,7 +2485,7 @@ fetch(url, {
                 <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;status&quot;: 200,
+    &quot;status&quot;: true,
     &quot;message&quot;: &quot;Liked successfully.&quot;,
     &quot;data&quot;: {
         &quot;liked&quot;: true,
@@ -2684,7 +2684,7 @@ fetch(url, {
                 <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;status&quot;: 200,
+    &quot;status&quot;: true,
     &quot;message&quot;: &quot;Like removed successfully.&quot;,
     &quot;data&quot;: {
         &quot;liked&quot;: false,
